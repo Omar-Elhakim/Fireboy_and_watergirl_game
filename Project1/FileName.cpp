@@ -17,6 +17,7 @@ int main() {
   window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
   // stopwatch
+  //
   Clock gameClock;
   Font font;
   font.loadFromFile("font.ttf");
