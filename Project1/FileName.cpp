@@ -19,7 +19,7 @@ void level1(RenderWindow &window);
 
 int main() {
   // Main window
-  RenderWindow window(VideoMode(1720, 1300), "SFML");
+  RenderWindow window(VideoMode(1720, 1300), "Fireboy and Watergirl");
   Image icon;
   icon.loadFromFile("icon.png");
   window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
