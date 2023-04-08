@@ -1,0 +1,7 @@
+﻿  Source1.cpp
+C:\Users\hp\source\repos\Project26\Project26\Source1.cpp(176,26): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\hp\source\repos\Project26\Project26\Source1.cpp(194,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\hp\source\repos\Project26\Project26\Source1.cpp(195,18): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\hp\source\repos\Project26\Project26\Source1.cpp(211,38): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\hp\source\repos\Project26\Project26\Source1.cpp(324,40): warning C4305: '=': truncation from 'double' to 'float'
+  Project26.vcxproj -> C:\Users\hp\source\repos\Project26\x64\Debug\Project26.exe
