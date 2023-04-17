@@ -90,6 +90,7 @@ void drawMenu(RenderWindow &window) {
   background.loadFromFile("TempleHallForest.png");
   Sprite bg;
   bg.setTexture(background);
+  bg.setScale(width / background.getSize().x, height / background.getSize().y);
 
   while (window.isOpen()) {
     Event event;
