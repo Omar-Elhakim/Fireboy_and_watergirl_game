@@ -6,9 +6,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
-#include <iostream>
 
-using namespace std;
 using namespace sf;
 
 // defining important variables
@@ -94,7 +92,6 @@ void drawMenu(RenderWindow &window) {
   bg.setTexture(background);
 
   while (window.isOpen()) {
-    cout << menu.selected << endl;
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
@@ -631,7 +628,6 @@ void drawOptoinsMenu(RenderWindow &window) {
   bg.setTexture(background);
 
   while (window.isOpen()) {
-    cout << optionsMenu.selected << endl;
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
