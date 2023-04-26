@@ -11,95 +11,36 @@
 using namespace std;
 using namespace sf;
 
-// for animation
-float gravity = 0.0035, fireboy_Vy = 0, watergirl_Vy = 0;
-int x = 0, y = 0, a = 0;
-
-void scaleFireboy(Sprite& sprite, const Vector2u& windowSize) {
-    float xScale = (float)windowSize.x / 1720;
-    float yScale = (float)windowSize.y / 1300;
-    float xPos = 77 * xScale;
-    float yPos = 1110 * yScale;
-    sprite.setScale(1.f * xScale, 1.f * yScale);
-    //sprite.setPosition(xPos, yPos);
-}
-
-void scaleWatergirl(Sprite& sprite, const Vector2u& windowSize) {
-    float xScale = (float)windowSize.x / 1720;
-    float yScale = (float)windowSize.y / 1300;
-    float xPos = 78 * xScale;
-    float yPos = 963 * yScale;
-    sprite.setScale(1.f * xScale, 1.f * yScale);
-    sprite.setPosition(xPos, yPos);
-}
-void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[], int size) {
-    // Calculate the scaling factors for x and y axis
-    float scaleX = (float)windowSize.x / 1210.f;
-    float scaleY = (float)windowSize.y / 850.f;
-
-    // Iterate over the ground array and scale each rectangle
-    for (int i = 0; i < size; i++) {
-        sf::Vector2f position = ground[i].getPosition();
-        sf::Vector2f size = ground[i].getSize();
-        position.x *= scaleX;
-        position.y *= scaleY;
-        size.x *= scaleX;
-        size.y *= scaleY;
-        ground[i].setPosition(position);
-        ground[i].setSize(size);
-    }
-}
-
-void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground) {
-    // Calculate the scaling factors for x and y axis
-    float scaleX = (float)windowSize.x / 1720.f;
-    float scaleY = (float)windowSize.y / 1300.f;
-
-    
-        sf::Vector2f position = ground.getPosition();
-        sf::Vector2f size = ground.getSize();
-        position.x *= scaleX;
-        position.y *= scaleY;
-        size.x *= scaleX;
-        size.y *= scaleY;
-        ground.setPosition(position);
-        ground.setSize(size);
-    
-}
-void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize) {
-    float scaleX = (float)windowSize.x / 1720.f;
-    float scaleY = (float)windowSize.y / 1300.f;
-    backgroundPic.setScale(scaleX, scaleY * 0.978f);
-    backgroundPic.setPosition(-14.f * scaleX, 10.f * scaleY);
-}
-
-
-void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window) {
-    float xScale = window.getSize().x / 1720.f;  // calculate x scaling factor
-    float yScale = window.getSize().y / 1300.f;  // calculate y scaling factor
-
-    // scale the diamond position
-    xPos *= xScale;
-    yPos *= yScale;
-}
 
 void level1(RenderWindow& window);
 
 int main() {
     // Main window
     RenderWindow window(VideoMode(1720, 1300), "Fireboy and Watergirl");
-
     Image icon;
     icon.loadFromFile("icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+   
     level1(window);
     return 0;
 }
 
-void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
-    RectangleShape ground[], RectangleShape& roof);
-void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
-    RectangleShape ground[], RectangleShape& roof);
+//gravity
+float gravity = 0.0035, fireboy_Vy = 0, watergirl_Vy = 0, box_Vy = 0;
+// for animation
+int x = 0, y = 0, a = 0;
+
+void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
+    RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[], RectangleShape& roof,RectangleShape& box);
+void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
+    RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[], RectangleShape& roof, RectangleShape& box);
+void scaleFireboy(Sprite& sprite, const Vector2u& windowSize);
+void scaleWatergirl(Sprite& sprite, const Vector2u& windowSize);
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[], int size);
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground);
+void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize);
+void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window);
+
 
 void level1(RenderWindow& window) {
 
@@ -117,16 +58,19 @@ void level1(RenderWindow& window) {
     timeText.setCharacterSize(55);
     timeText.setFillColor(sf::Color(255, 215, 0));
     timeText.setPosition(780, 0);
+   
     // background music
     Music backgroundMusic;
     backgroundMusic.openFromFile("background-music.wav");
     backgroundMusic.setLoop(true);
     // backgroundMusic.play();
+    
     // death sound
     SoundBuffer death_buffer;
     death_buffer.loadFromFile("Death.wav");
     Sound death_sound;
     death_sound.setBuffer(death_buffer);
+    
     // diamond sound
     SoundBuffer diamond_buffer;
     diamond_buffer.loadFromFile("Diamond.wav");
@@ -139,9 +83,19 @@ void level1(RenderWindow& window) {
     Sprite backgroundPic(backgroundTexture);
     backgroundPic.setScale(1.0f, 0.978f);
     scaleBackground(backgroundPic, window.getSize());
+
+    //box
+    RectangleShape box(Vector2f(60.0f, 60.0f));
+    Texture boxtxt;
+    box.setPosition(571.0F, 350.0F);
+    boxtxt.loadFromFile("box.png");
+    box.setTexture(&boxtxt);
+
+
     //crating fireboy  diamonds
     Texture red1;
     red1.loadFromFile("redDiamond.png");
+   
     //diamond1
     Sprite redDiamond1(red1);
     float x1 = 845.f, y1 = 1120.f;
@@ -162,7 +116,6 @@ void level1(RenderWindow& window) {
 
     //diamond 4
     Sprite redDiamond4(red1);
-    // scale diamond 4 position
     float x4 = 760.f, y4 = 160.f;
     scalePosition(x4, y4, window);
     redDiamond4.setPosition(x4, y4);
@@ -170,6 +123,7 @@ void level1(RenderWindow& window) {
     //crating watergirl  diamonds
     Texture blue1;
     blue1.loadFromFile("blueDiamond.png");
+   
     //diamond1
     Sprite blueDiamond1(blue1);
     float x5 = 1200.f, y5 = 1120.f;
@@ -200,6 +154,7 @@ void level1(RenderWindow& window) {
     lava.setPosition(830.f, 1238.f);
     lava.setFillColor(Color(255, 0, 0));
     scaleRectangles(window.getSize(), lava);
+   
     // creating lake
     RectangleShape lake(Vector2f(145.f, 10.f));
     lake.setPosition(1165.f, 1238.f);
@@ -257,7 +212,7 @@ void level1(RenderWindow& window) {
         //floor4 top of square left
         RectangleShape(Vector2f(155.f, 10.f)),
         //floor4 width of square left
-        RectangleShape(Vector2f(10.f, 120.f)),
+        RectangleShape(Vector2f(10.f, 90.f)),
         //floor4 middle obstacle left
         RectangleShape(Vector2f(10.f, 50.f)),
         //floor4 middle obstacle incline
@@ -308,17 +263,17 @@ void level1(RenderWindow& window) {
         //floor3 straight left
         ground[11].setPosition(160.f, 440.f);
         //floor4 straight left
-        ground[12].setPosition(190.f, 330.f);
+        ground[12].setPosition(190.f, 320.f);
         //floor4 straight right
         ground[13].setPosition(870.f, 330.f);
         //floor4 middle obstacle straight up
         ground[14].setPosition(590.f, 270.f);
         //floor4 top of square left
-        ground[15].setPosition(30.f, 215.f);
+        ground[15].setPosition(0.f, 215.f);
         //floor4 width of square left
-        ground[16].setPosition(170.f, 215.f); //small  left wall
+        ground[16].setPosition(160.f, 225.f); //small  left wall
         //floor4 middle obstacle left
-        ground[17].setPosition(595.f, 270.f);
+        ground[17].setPosition(595.f, 290.f); //small right wall up
         //floor4 middle obstacle incline
         ground[18].setPosition(810.f, 285.f);
         ground[18].setRotation(-45);
@@ -346,13 +301,17 @@ void level1(RenderWindow& window) {
     }
     scaleRectangles(window.getSize(), ground, 29);
 
-    //roof
+    //moving the top rectangle because sprites can jump and walk on it
+    ground[4].setPosition(Vector2f(-2, -200));
+    
+    //roof on top of the 4th floor
     RectangleShape roof(Vector2f(969.f, 10));
     roof.setPosition(697.f, 310.f);
 
-
+    //zatoona
+    /*
     /////////////////////////////////////
-    // zatoona part    
+    // zatoona part
     //button1
         //X: 460
         //Y:662
@@ -389,7 +348,7 @@ void level1(RenderWindow& window) {
 
 
 
-    /////////////////////////////////////////////////////////    
+    /////////////////////////////////////////////////////////
         //Elevator1 START fo2
     RectangleShape STRTelv1(Vector2f(160, 5));
     STRTelv1.setPosition(1500, 533);
@@ -412,11 +371,11 @@ void level1(RenderWindow& window) {
     ENDelv1.setFillColor(Color(255, 0, 0));
     //////////////////////////////////////////////////////
     //
-    // 
-    // 
-    // 
-    // 
-    // 
+    //
+    //
+    //
+    //
+    //
        //Elevator 2 START FO2
     RectangleShape STRTelv2(Vector2f(160, 5));
     STRTelv2.setPosition(37, 673);
@@ -447,36 +406,29 @@ void level1(RenderWindow& window) {
     ENDelv2.setPosition(37, 820);
     ENDelv2.setFillColor(Color(255, 0, 0));
 
-    //37 
+    //37
     //820
-
-
-
+    */
 
     // making and editing fireboy
     Texture text;
     text.loadFromFile("fireboysheet.png");
     Sprite fireboy(text);
-    //fireboy.setPosition(Vector2f(77, 1110));
-    //fireboy.setScale(1.f, 1.f);
     fireboy.setTextureRect(sf::IntRect(0 * 113, 4 * 95, 105, 105));
     scaleFireboy(fireboy, window.getSize());
-
+    fireboy.setPosition(0, 0);
+    
     // making and editing watergirl
     Texture texting;
     texting.loadFromFile("watergirlsheet.png");
     Sprite watergirl(texting);
-    //watergirl.setPosition(Vector2f(78, 963));
-    //watergirl.setScale(1.f, 1.f);
     watergirl.setTextureRect(sf::IntRect(0 * 175, 4 * 133, 100, 90));
     scaleWatergirl(watergirl, window.getSize());
-
-    // gravity
-    float gravity = 0.003, fireboy_velocity_y = 0, watergirl_Vy = 0;
-
+   // watergirl.setPosition(0, 0);
+  
     // main event
     Event ev;
-
+    
     // Main Game loop
     while (window.isOpen()) {
 
@@ -484,8 +436,9 @@ void level1(RenderWindow& window) {
             if (ev.type == Event::Closed)
                 window.close();
         }
+       
 
-        // timer
+        // stopwatch
         Time gameTime = gameClock.getElapsedTime();
         int minutes = gameTime.asSeconds() / 60;
         int temp = gameTime.asSeconds();
@@ -493,8 +446,8 @@ void level1(RenderWindow& window) {
         timeText.setString(std::to_string(minutes) + ":" +
             (seconds < 10 ? "0" : "") + std::to_string(seconds));
 
-        // move fireboy
-        Fmove(fireboy, right_wall, left_wall, ground, roof);
+        // fireboy moving function
+        Fmove(fireboy, right_wall, ground[1], ground[17], left_wall ,ground[16], ground, roof,box);
 
         // fireboy diamonds
         {
@@ -528,8 +481,8 @@ void level1(RenderWindow& window) {
             death_sound.play();
         }
         */
-        // watergirl movments
-        Wmove(watergirl, right_wall, left_wall, ground, roof);
+        // watergirl moving function
+        Wmove(watergirl, right_wall, ground[1], ground[17], left_wall, ground[16], ground, roof,box);
 
         // watergirl diamonds
         {
@@ -566,226 +519,286 @@ void level1(RenderWindow& window) {
         // retry
         if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
             fireboy.setPosition(Vector2f(0, 0));
-            watergirl.setPosition(Vector2f(77, 1110));
+            watergirl.setPosition(Vector2f(0, 0));
         }
 
         // exit when esc is pressed
         if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
             window.close();
         }
-        ground[4].setPosition(Vector2f(-2, -200));
+        
+        
+        //zatoona
+         /*
+
+         //lever adjustments
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())))
+         {
+             if (((fireboy.getGlobalBounds().intersects(stlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) ||
+                 ((watergirl.getGlobalBounds().intersects(stlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))))
+
+             {
+                 lvr.rotate(-90);
+             }
 
 
-        //lever adjustments
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())))
-        {
-            if (((fireboy.getGlobalBounds().intersects(stlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) ||
-                ((watergirl.getGlobalBounds().intersects(stlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))))
+         }
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())))
+         {
+             if (((fireboy.getGlobalBounds().intersects(endlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) ||
+                 ((watergirl.getGlobalBounds().intersects(endlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))))
 
+             {
+                 lvr.rotate(90);
+             }
+
+
+         }
+
+
+
+
+
+         //elev2 implements
+         if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) && ((!elevator2.getGlobalBounds().intersects(ENDelv2.getGlobalBounds()))))
+
+
+         {
+             elevator2.move(0, 2);
+
+         }
+
+         if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((!elevator2.getGlobalBounds().intersects(STRTelv2.getGlobalBounds()))))
+         {
+             elevator2.move(0, -2);
+         }
+         if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds()))))
+         {
+             fireboy.move(0, -2);
+         }
+         if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((watergirl.getGlobalBounds().intersects(elevator2.getGlobalBounds()))))
+         {
+             watergirl.move(0, -2);
+         }
+
+         //////buttons implements//////
+         if (((fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) ||
+         (fireboy.getGlobalBounds().intersects(butt2.getGlobalBounds()))) || 
+         ((watergirl.getGlobalBounds().intersects(butt1.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(butt2.getGlobalBounds())))) {
+             if (!elevator1.getGlobalBounds().intersects(ENDelv1.getGlobalBounds())) {
+
+                 elevator1.move(0, 2);
+             }
+         }
+         if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) && 
+         (!fireboy.getGlobalBounds().intersects(butt2.getGlobalBounds()))) && 
+         ((!watergirl.getGlobalBounds().intersects(butt1.getGlobalBounds())) && (!watergirl.getGlobalBounds().intersects(butt2.getGlobalBounds())))) {
+             if (!elevator1.getGlobalBounds().intersects(STRTelv1.getGlobalBounds())) {
+
+                 elevator1.move(0, -2);
+             }
+         }
+
+         //fireboy move up with elev 1 //
+         if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds())) {
+             fireboy.move(0, -2);
+         }
+         //fireboy move down with elev 1 //
+         if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds())) {
+             fireboy.move(0, 2);
+         }
+         //fireboy move up with elev 2 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, -2);
+         }
+         //fireboy move down with elev 2 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, 2);
+         }
+
+
+         //watergirl move up with elev 1 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, -2);
+         }
+         //watergirl move down with elev 1 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, 2);
+         }
+         //watergirl move up with elev 2 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, -2);
+         }
+         //watergirl move down with elev 2 //
+         if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
+             fireboy.move(0, 2);
+         }
+
+
+
+
+
+
+         //lever never touch
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+             if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((fireboy.getGlobalBounds().intersects(endlvr.getGlobalBounds())))) {
+                 fireboy.move(-2, 0);
+             }
+
+         }
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+             if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((fireboy.getGlobalBounds().intersects(stlvr.getGlobalBounds())))) {
+                 fireboy.move(2, 0);
+             }
+
+         }
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+             if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((watergirl.getGlobalBounds().intersects(endlvr.getGlobalBounds())))) {
+                 watergirl.move(-2, 0);
+             }
+
+         }
+         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+             if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((watergirl.getGlobalBounds().intersects(stlvr.getGlobalBounds())))) {
+                 watergirl.move(2, 0);
+             }
+
+         }
+
+         */
+
+         
+         // box
+        
+            //box gravity
+
+            if ((!box.getGlobalBounds().intersects(ground[14].getGlobalBounds())) &&
+                (!box.getGlobalBounds().intersects(ground[12].getGlobalBounds())))
             {
-                lvr.rotate(-90);
+                box_Vy += gravity;
             }
-
-
-        }
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())))
-        {
-            if (((fireboy.getGlobalBounds().intersects(endlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) ||
-                ((watergirl.getGlobalBounds().intersects(endlvr.getGlobalBounds())) && (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))))
-
+            else
             {
-                lvr.rotate(90);
+                box_Vy = 0;
             }
+            box.move(0, box_Vy);
 
-
-        }
-
-
-
-
-
-        //elev2 implements
-        if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) && ((!elevator2.getGlobalBounds().intersects(ENDelv2.getGlobalBounds()))))
-
-
-        {
-            elevator2.move(0, 2);
-
-        }
-
-        if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((!elevator2.getGlobalBounds().intersects(STRTelv2.getGlobalBounds()))))
-        {
-            elevator2.move(0, -2);
-        }
-        if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds()))))
-        {
-            fireboy.move(0, -2);
-        }
-        if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) && ((watergirl.getGlobalBounds().intersects(elevator2.getGlobalBounds()))))
-        {
-            watergirl.move(0, -2);
-        }
-
-        //////buttons implements//////         
-        if (((fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) || (fireboy.getGlobalBounds().intersects(butt2.getGlobalBounds()))) || ((watergirl.getGlobalBounds().intersects(butt1.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(butt2.getGlobalBounds())))) {
-            if (!elevator1.getGlobalBounds().intersects(ENDelv1.getGlobalBounds())) {
-
-                elevator1.move(0, 2);
+            //box movements with fireboy
+            if (Keyboard::isKeyPressed(Keyboard::Key::Right) &&
+                fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
+                (fireboy.getPosition().x < box.getPosition().x))
+            {
+                box.move(0.5, 0);
             }
-        }
-        if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) && (!fireboy.getGlobalBounds().intersects(butt2.getGlobalBounds()))) && ((!watergirl.getGlobalBounds().intersects(butt1.getGlobalBounds())) && (!watergirl.getGlobalBounds().intersects(butt2.getGlobalBounds())))) {
-            if (!elevator1.getGlobalBounds().intersects(STRTelv1.getGlobalBounds())) {
-
-                elevator1.move(0, -2);
+            else if (fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
+                Keyboard::isKeyPressed(Keyboard::Key::Left) &&
+                (fireboy.getPosition().x > box.getPosition().x))
+            {
+                box.move(-0.5, 0);
             }
-        }
-
-        //fireboy move up with elev 1 //
-        if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds())) {
-            fireboy.move(0, -2);
-        }
-        //fireboy move down with elev 1 //
-        if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds())) {
-            fireboy.move(0, 2);
-        }
-        //fireboy move up with elev 2 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, -2);
-        }
-        //fireboy move down with elev 2 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, 2);
-        }
-
-
-        //watergirl move up with elev 1 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, -2);
-        }
-        //watergirl move down with elev 1 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, 2);
-        }
-        //watergirl move up with elev 2 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, -2);
-        }
-        //watergirl move down with elev 2 //
-        if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds())) {
-            fireboy.move(0, 2);
-        }
-
-
-
-
-
-
-        //lever never touch
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-            if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((fireboy.getGlobalBounds().intersects(endlvr.getGlobalBounds())))) {
-                fireboy.move(-2, 0);
+            //box movements with watergirl
+            if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
+                watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
+                (watergirl.getPosition().x < box.getPosition().x))
+            {
+                box.move(0.5, 0);
             }
-
-        }
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-            if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((fireboy.getGlobalBounds().intersects(stlvr.getGlobalBounds())))) {
-                fireboy.move(2, 0);
+            else if (watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
+                Keyboard::isKeyPressed(Keyboard::Key::A) &&
+                (watergirl.getPosition().x > box.getPosition().x))
+            {
+                box.move(-0.5, 0);
             }
-
-        }
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-            if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((watergirl.getGlobalBounds().intersects(endlvr.getGlobalBounds())))) {
-                watergirl.move(-2, 0);
+        
+          
+            // drawing
+            { 
+            /*
+                //window.draw(lvr);
+                //window.draw(butt1);
+                window.draw(stlvr);
+                window.draw(endlvr);
+                window.draw(elevator1);
+                window.draw(STRTelv1);
+                window.draw(ENDelv1);
+                window.draw(butt2);
+                window.draw(elevator2);
+                window.draw(STRTelv2);
+                window.draw(ENDelv2);
+                */
+                window.clear();
+                window.draw(backgroundPic);
+                window.draw(lava);
+                window.draw(lake);
+                window.draw(box);
+                window.draw(green_goo);
+                window.draw(redDiamond1);
+                window.draw(redDiamond2);
+                window.draw(redDiamond3);
+                window.draw(redDiamond4);
+                window.draw(blueDiamond1);
+                window.draw(blueDiamond2);
+                window.draw(blueDiamond3);
+                window.draw(blueDiamond4);
+                window.draw(fireboy);
+                window.draw(watergirl);
+                window.draw(timeText);
+                window.display();
             }
-
-        }
-        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) || (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-            if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) && ((watergirl.getGlobalBounds().intersects(stlvr.getGlobalBounds())))) {
-                watergirl.move(2, 0);
-            }
-
-        }
-
-
-
-
-        // drawing
-        {
-            window.clear();
-            window.draw(backgroundPic);
-            window.draw(lvr);
-            window.draw(butt1);
-
-            //window.draw(right_wall);
-          //  window.draw(left_wall);
-          //  for (int i = 0; i < 29; i++) {
-                //ground[i].setFillColor(Color(255, 255, 255));
-
-           //     window.draw(ground[i]);
-           // }
-            window.draw(lava);
-            window.draw(lake);
-
-            window.draw(stlvr);
-            window.draw(endlvr);
-
-            window.draw(elevator1);
-            window.draw(STRTelv1);
-            window.draw(ENDelv1);
-            window.draw(butt2);
-            window.draw(elevator2);
-            window.draw(STRTelv2);
-            window.draw(ENDelv2);
-
-            window.draw(green_goo);
-            window.draw(redDiamond1);
-            window.draw(redDiamond2);
-            window.draw(redDiamond3);
-            window.draw(redDiamond4);
-            window.draw(blueDiamond1);
-            window.draw(blueDiamond2);
-            window.draw(blueDiamond3);
-            window.draw(blueDiamond4);
-            window.draw(fireboy);
-            window.draw(watergirl);
-            window.draw(timeText);
-           // window.draw(roof);
-            window.display();
-        }
+        
     }
-}bool doesIntersect(Sprite& player, RectangleShape ground[]) {
+}
+/*/
+bool doesIntersectbox(Sprite& sprite, RectangleShape& box) {
+    // Check if the bottom of the sprite intersects with the top of the box
+    if (sprite.getPosition().y + sprite.getGlobalBounds().height >= box.getPosition().y &&
+        sprite.getPosition().y + sprite.getGlobalBounds().height <= box.getPosition().y + box.getGlobalBounds().height &&
+        sprite.getPosition().x + sprite.getGlobalBounds().width > box.getPosition().x &&
+        sprite.getPosition().x < box.getPosition().x + box.getGlobalBounds().width 
+       // sprite.getPosition().x >= box.getPosition().x &&
+        //sprite.getPosition().x + sprite.getGlobalBounds().width <= box.getPosition().x + box.getGlobalBounds().width)
+        )
+    {
+        
+        return true;
+    }
+    return false;
+}
+*/
+
+bool doesIntersect(Sprite& player, RectangleShape ground[],RectangleShape& box) {
+   // checking for collision with the box
+    if (player.getPosition().y + player.getGlobalBounds().height >= box.getPosition().y &&
+        player.getPosition().y + player.getGlobalBounds().height <= box.getPosition().y + box.getGlobalBounds().height &&
+        player.getPosition().x + player.getGlobalBounds().width > box.getPosition().x &&
+        player.getPosition().x < box.getPosition().x + box.getGlobalBounds().width)
+    {
+        return true;
+    }
     for (int i = 0; i < 29; i++) {
-        if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds())) {
+        if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds())&& i!=1 && i != 16 && i != 17) {
             // Check if the bottom side of the player sprite intersects with the top side of the ground rectangle
             if (player.getPosition().y + player.getGlobalBounds().height >= ground[i].getPosition().y &&
                 player.getPosition().y + player.getGlobalBounds().height <= ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
                 player.getPosition().x + player.getGlobalBounds().width > ground[i].getPosition().x &&
                 player.getPosition().x < ground[i].getPosition().x + ground[i].getGlobalBounds().width) {
                 return true;
-            }/*
-            // Check if the top side of the player sprite intersects with the bottom side of the ground rectangle
-            if (player.getPosition().y <= ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
-                player.getPosition().y + player.getGlobalBounds().height >= ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
-                player.getPosition().x + player.getGlobalBounds().width > ground[i].getPosition().x &&
-                player.getPosition().x < ground[i].getPosition().x + ground[i].getGlobalBounds().width-10) {
-                fireboy_Vy=0;
-                //player.setPosition(player.getPosition().x, player.getPosition().y + 3);
-
-            }*/
+            }
         }
     }
     return false;
 }
 
-
-
-
-void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
-    RectangleShape ground[],RectangleShape& roof)
+void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
+    RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[], RectangleShape& roof,RectangleShape& box)
 {
 
     // Check if the top side of the player sprite intersects with the bottom side of the roof rectangle
-   
+
     if (fireboy.getGlobalBounds().intersects(roof.getGlobalBounds()))
     {
         fireboy.setPosition(fireboy.getPosition().x, roof.getPosition().y + 10);
@@ -793,7 +806,11 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
 
     // to the right
     if ((Keyboard::isKeyPressed(Keyboard::Key::Right)) &&
-        (!fireboy.getGlobalBounds().intersects(rWall.getGlobalBounds()))) {
+        (!fireboy.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
+        (!fireboy.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
+        (!fireboy.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
+        !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) && box.getGlobalBounds().intersects(rWall3.getGlobalBounds())))
+    {
         fireboy.move(0.5f, 0.0f);
         a++;
         if (a % 50 == 0) {
@@ -805,8 +822,11 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
     }
     // to the left
     if (Keyboard::isKeyPressed(Keyboard::Key::Left) &&
-        (!fireboy.getGlobalBounds().intersects(lWall.getGlobalBounds()))) {
-        fireboy.move(-0.7f, 0.0f);
+        (!fireboy.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
+        (!fireboy.getGlobalBounds().intersects(lWall2.getGlobalBounds())) &&
+        !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) && box.getGlobalBounds().intersects(lWall2.getGlobalBounds())))
+    {
+        fireboy.move(-0.5f, 0.0f);
         a++;
         if (a % 50 == 0) {
             x++;
@@ -816,14 +836,14 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
         fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
     }
     // fireboy jumping
-    if ((!doesIntersect(fireboy, ground))) {
+    if ((!doesIntersect(fireboy, ground,box)) ) {
         fireboy_Vy += gravity;
     }
     else {
         fireboy_Vy = 0;
     }
-    if ((Keyboard::isKeyPressed(Keyboard::Key::Up)) &&
-        (doesIntersect(fireboy, ground))) {
+    if ((Keyboard::isKeyPressed(Keyboard::Key::Up)) &&(
+        (doesIntersect(fireboy, ground,box)) )) {
         fireboy_Vy = -0.9;
         a++;
         if (a % 50 == 0)
@@ -835,9 +855,9 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& lWall,
     // to the up
     fireboy.move(0, fireboy_Vy);
 }
-
-void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
-    RectangleShape ground[], RectangleShape& roof) {
+void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
+    RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[], RectangleShape& roof, RectangleShape& box)
+{
 
     if (watergirl.getGlobalBounds().intersects(roof.getGlobalBounds()))
     {
@@ -845,7 +865,10 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
     }
     // to the right
     if ((Keyboard::isKeyPressed(Keyboard::Key::D)) &&
-        (!watergirl.getGlobalBounds().intersects(rWall.getGlobalBounds()))) {
+        (!watergirl.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
+        (!watergirl.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
+        (!watergirl.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
+        !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) && box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
         watergirl.move(0.5f, 0.0f);
         a++;
         if (a % 50 == 0) {
@@ -857,7 +880,9 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
     }
     // to the left
     if ((Keyboard::isKeyPressed(Keyboard::Key::A)) &&
-        (!watergirl.getGlobalBounds().intersects(lWall.getGlobalBounds()))) {
+        (!watergirl.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
+        (!watergirl.getGlobalBounds().intersects(lWall2.getGlobalBounds()))&&
+        !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) && box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
         watergirl.move(-0.5f, 0.0f);
         a++;
         if (a % 50 == 0) {
@@ -868,14 +893,14 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
         watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
     }
     // watergirl jumping
-    if ((!doesIntersect(watergirl, ground))) {
+    if ((!doesIntersect(watergirl, ground,box))) {
         watergirl_Vy += gravity;
     }
     else {
         watergirl_Vy = 0;
     }
     if ((Keyboard::isKeyPressed(Keyboard::Key::W)) &&
-        (doesIntersect(watergirl, ground))) {
+        (doesIntersect(watergirl, ground,box))) {
         watergirl_Vy = -0.9;
         a++;
         if (a % 50 == 0)
@@ -886,4 +911,68 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& lWall,
     }
     // to the up
     watergirl.move(0, watergirl_Vy);
+}
+
+void scaleFireboy(Sprite& sprite, const Vector2u& windowSize) {
+    float xScale = (float)windowSize.x / 1720;
+    float yScale = (float)windowSize.y / 1300;
+    float xPos = 77 * xScale;
+    float yPos = 1110 * yScale;
+    sprite.setScale(1.f * xScale, 1.f * yScale);
+    sprite.setPosition(xPos, yPos);
+}
+void scaleWatergirl(Sprite& sprite, const Vector2u& windowSize) {
+    float xScale = (float)windowSize.x / 1720;
+    float yScale = (float)windowSize.y / 1300;
+    float xPos = 78 * xScale;
+    float yPos = 963 * yScale;
+    sprite.setScale(1.f * xScale, 1.f * yScale);
+    sprite.setPosition(xPos, yPos);
+}
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[], int size) {
+    // Calculate the scaling factors for x and y axis
+    float scaleX = (float)windowSize.x / 1210.f;
+    float scaleY = (float)windowSize.y / 850.f;
+
+    // Iterate over the ground array and scale each rectangle
+    for (int i = 0; i < size; i++) {
+        sf::Vector2f position = ground[i].getPosition();
+        sf::Vector2f size = ground[i].getSize();
+        position.x *= scaleX;
+        position.y *= scaleY;
+        size.x *= scaleX;
+        size.y *= scaleY;
+        ground[i].setPosition(position);
+        ground[i].setSize(size);
+    }
+}
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground) {
+    // Calculate the scaling factors for x and y axis
+    float scaleX = (float)windowSize.x / 1720.f;
+    float scaleY = (float)windowSize.y / 1300.f;
+
+
+    sf::Vector2f position = ground.getPosition();
+    sf::Vector2f size = ground.getSize();
+    position.x *= scaleX;
+    position.y *= scaleY;
+    size.x *= scaleX;
+    size.y *= scaleY;
+    ground.setPosition(position);
+    ground.setSize(size);
+
+}
+void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize) {
+    float scaleX = (float)windowSize.x / 1720.f;
+    float scaleY = (float)windowSize.y / 1300.f;
+    backgroundPic.setScale(scaleX, scaleY * 0.978f);
+    backgroundPic.setPosition(-14.f * scaleX, 10.f * scaleY);
+}
+void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window) {
+    float xScale = window.getSize().x / 1720.f;  // calculate x scaling factor
+    float yScale = window.getSize().y / 1300.f;  // calculate y scaling factor
+
+    // scale the diamond position
+    xPos *= xScale;
+    yPos *= yScale;
 }
