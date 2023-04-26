@@ -3,9 +3,11 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
+#include <iostream>
 
 using namespace sf;
 
@@ -42,6 +44,7 @@ struct Menu {
       mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
   }
+  void setSelected(int n) { selected = n; }
   int pressed() { return selected; }
 } menu, optionsMenu;
 
@@ -64,6 +67,11 @@ int main() {
   return 0;
 }
 
+// getting the right coordinates to center Menu text
+float getCenter(Text text) {
+  return (width - text.getGlobalBounds().width) / 2;
+}
+
 void drawMenu(RenderWindow &window) {
   // making menu options
   menu.font.loadFromFile("varsity_regular.ttf");
@@ -72,19 +80,22 @@ void drawMenu(RenderWindow &window) {
   menu.mainmenu[0].setFillColor(Color{204, 153, 0});
   menu.mainmenu[0].setString("play");
   menu.mainmenu[0].setCharacterSize(90);
-  menu.mainmenu[0].setPosition(Vector2f(width / (3), height / (4)));
+  menu.mainmenu[0].setPosition(
+      Vector2f(getCenter(menu.mainmenu[0]), height / (4)));
 
   menu.mainmenu[1].setFont(menu.font);
   menu.mainmenu[1].setFillColor(Color::White);
   menu.mainmenu[1].setString("options");
   menu.mainmenu[1].setCharacterSize(90);
-  menu.mainmenu[1].setPosition(Vector2f(width / (3), height / (4) + 200));
+  menu.mainmenu[1].setPosition(
+      Vector2f(getCenter(menu.mainmenu[1]), height / (4) + 200));
 
   menu.mainmenu[2].setFont(menu.font);
   menu.mainmenu[2].setFillColor(Color::White);
   menu.mainmenu[2].setString("exit");
   menu.mainmenu[2].setCharacterSize(90);
-  menu.mainmenu[2].setPosition(Vector2f(width / (3), height / (4) + 400));
+  menu.mainmenu[2].setPosition(
+      Vector2f(getCenter(menu.mainmenu[2]), height / (4) + 400));
 
   Texture background;
   background.loadFromFile("TempleHallForest.png");
@@ -116,7 +127,7 @@ void drawMenu(RenderWindow &window) {
             break;
           case 1:
             window.clear();
-            menu.selected--;
+            menu.setSelected(0);
             drawOptoinsMenu(window);
             break;
           case 2:
@@ -347,6 +358,8 @@ void level1(RenderWindow &window) {
   ground[27].setPosition(310.f, 125.f);
   ground[28].setPosition(315.f, 120.f);
   ground[28].setRotation(45);
+  for (int i = 0; i < 29; i++)
+    ground[i].setFillColor(Color(255, 255, 255));
   // making and editing fireboy
   Texture text;
   text.loadFromFile("fireboysheet.png");
@@ -373,8 +386,9 @@ void level1(RenderWindow &window) {
   while (window.isOpen()) {
 
     while (window.pollEvent(ev)) {
-      if (ev.type == Event::Closed)
+      if (ev.type == Event::Closed) {
         window.close();
+      }
     }
 
     // timer
@@ -463,7 +477,8 @@ void level1(RenderWindow &window) {
 
     // exit when esc is pressed
     if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-      window.close();
+      window.clear();
+      drawMenu(window);
     }
 
     // drawing
@@ -473,7 +488,6 @@ void level1(RenderWindow &window) {
       window.draw(right_wall);
       window.draw(left_wall);
       for (int i = 0; i < 29; i++) {
-        ground[i].setFillColor(Color(255, 255, 255));
         window.draw(ground[i]);
       }
       window.draw(lava);
@@ -607,26 +621,28 @@ void drawOptoinsMenu(RenderWindow &window) {
   optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
   optionsMenu.mainmenu[0].setString("Music");
   optionsMenu.mainmenu[0].setCharacterSize(90);
-  optionsMenu.mainmenu[0].setPosition(Vector2f(width / (3), height / (4)));
+  optionsMenu.mainmenu[0].setPosition(
+      Vector2f(getCenter(optionsMenu.mainmenu[0]), height / (4)));
 
   optionsMenu.mainmenu[1].setFont(menu.font);
   optionsMenu.mainmenu[1].setFillColor(Color::White);
   optionsMenu.mainmenu[1].setString("EFX");
   optionsMenu.mainmenu[1].setCharacterSize(90);
   optionsMenu.mainmenu[1].setPosition(
-      Vector2f(width / (3), height / (4) + 200));
+      Vector2f(getCenter(optionsMenu.mainmenu[1]), height / (4) + 200));
 
   optionsMenu.mainmenu[2].setFont(menu.font);
   optionsMenu.mainmenu[2].setFillColor(Color::White);
   optionsMenu.mainmenu[2].setString("Back");
   optionsMenu.mainmenu[2].setCharacterSize(90);
   optionsMenu.mainmenu[2].setPosition(
-      Vector2f(width / (3), height / (4) + 400));
+      Vector2f(getCenter(optionsMenu.mainmenu[2]), height / (4) + 400));
 
   Texture background;
   background.loadFromFile("TempleHallForest.png");
   Sprite bg;
   bg.setTexture(background);
+  bg.setScale(width / background.getSize().x, height / background.getSize().y);
 
   while (window.isOpen()) {
     Event event;
@@ -655,8 +671,7 @@ void drawOptoinsMenu(RenderWindow &window) {
             break;
           case 2:
             window.clear();
-            optionsMenu.selected--;
-            optionsMenu.selected--;
+            optionsMenu.setSelected(0);
             drawMenu(window);
             break;
           }
