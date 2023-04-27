@@ -1,3 +1,9 @@
+// notes :-
+// for increasing performance change Keyboard evnets handling in the menu
+// functions to be like play function
+// cause it's a nested loop unlike the level1 func.
+// i changed the way the while loop work from while(window.isOpen()) to
+// while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -20,37 +26,54 @@ float gravity = 0.003, fireboy_Vy = 0, watergirl_Vy = 0;
 int x = 0, y = 0, a = 0;
 
 struct Menu {
+  bool isActive = false;
+  RectangleShape smallMenu;
+  // text array size but i won't make a dynamic array,
+  // for using in moving functions.
+  int size;
   Font font;
-  Text mainmenu[3];
+  Text mainmenu[4];
   int selected = 0;
   void draw(RenderWindow &window) {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < size; i++) {
       window.draw(mainmenu[i]);
     }
   }
   void MoveDown() {
-    if (selected < 2) // not in exit
-    {
+    if (selected < size - 1) // not in exit (last option in the menu)
+     {
       mainmenu[selected].setFillColor(Color::White);
       selected++;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    } else {
+      mainmenu[selected].setFillColor(Color::White);
+      selected = 0;
       mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
   }
   void MoveUp() {
-    if (selected > 0) // not in play
+    if (selected > 0) // not in play (first option in the menu)
     {
       mainmenu[selected].setFillColor(Color::White);
       selected--;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    } else {
+      mainmenu[selected].setFillColor(Color::White);
+      selected = size - 1;
       mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
   }
   void setSelected(int n) { selected = n; }
   int pressed() { return selected; }
-} menu, optionsMenu;
+} menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
 // define some functions
 void drawMenu(RenderWindow &window);
 void drawOptoinsMenu(RenderWindow &window);
+void drawPauseMenu(RenderWindow &window);
+void drawLosingMenu(RenderWindow &window);
+void drawWinningMenu(RenderWindow &window);
+void drawCreditesMenu(RenderWindow &window);
 void level1(RenderWindow &window);
 void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &lWall,
            RectangleShape ground[]);
@@ -63,6 +86,7 @@ int main() {
   Image icon;
   icon.loadFromFile("icon.png");
   window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+  menu.isActive = true;
   drawMenu(window);
   return 0;
 }
@@ -75,27 +99,35 @@ float getCenter(Text text) {
 void drawMenu(RenderWindow &window) {
   // making menu options
   menu.font.loadFromFile("varsity_regular.ttf");
+  menu.size = 4;
 
   menu.mainmenu[0].setFont(menu.font);
   menu.mainmenu[0].setFillColor(Color{204, 153, 0});
-  menu.mainmenu[0].setString("play");
+  menu.mainmenu[0].setString("Play");
   menu.mainmenu[0].setCharacterSize(90);
   menu.mainmenu[0].setPosition(
       Vector2f(getCenter(menu.mainmenu[0]), height / (4)));
 
   menu.mainmenu[1].setFont(menu.font);
   menu.mainmenu[1].setFillColor(Color::White);
-  menu.mainmenu[1].setString("options");
+  menu.mainmenu[1].setString("Options");
   menu.mainmenu[1].setCharacterSize(90);
   menu.mainmenu[1].setPosition(
-      Vector2f(getCenter(menu.mainmenu[1]), height / (4) + 200));
+      Vector2f(getCenter(menu.mainmenu[1]), height / (4) + 100));
 
   menu.mainmenu[2].setFont(menu.font);
   menu.mainmenu[2].setFillColor(Color::White);
-  menu.mainmenu[2].setString("exit");
+  menu.mainmenu[2].setString("Credits");
   menu.mainmenu[2].setCharacterSize(90);
   menu.mainmenu[2].setPosition(
-      Vector2f(getCenter(menu.mainmenu[2]), height / (4) + 400));
+      Vector2f(getCenter(menu.mainmenu[2]), height / (4) + 200));
+
+  menu.mainmenu[3].setFont(menu.font);
+  menu.mainmenu[3].setFillColor(Color::White);
+  menu.mainmenu[3].setString("Exit");
+  menu.mainmenu[3].setCharacterSize(90);
+  menu.mainmenu[3].setPosition(
+      Vector2f(getCenter(menu.mainmenu[3]), height / (4) + 300));
 
   Texture background;
   background.loadFromFile("TempleHallForest.png");
@@ -103,7 +135,7 @@ void drawMenu(RenderWindow &window) {
   bg.setTexture(background);
   bg.setScale(width / background.getSize().x, height / background.getSize().y);
 
-  while (window.isOpen()) {
+  while (menu.isActive && window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
@@ -116,24 +148,29 @@ void drawMenu(RenderWindow &window) {
         if (event.key.code == Keyboard::Down) {
           menu.MoveDown();
         }
-        if (event.key.code == Keyboard::Escape)
-          window.close();
       } else if (event.type == Event::KeyReleased) {
         if (event.key.code == Keyboard::Enter) {
           switch (menu.selected) {
           case 0:
             window.clear();
+            menu.isActive = false;
             level1(window);
             break;
           case 1:
             window.clear();
             menu.setSelected(0);
+            optionsMenu.isActive = true;
+            menu.isActive = false;
             drawOptoinsMenu(window);
             break;
           case 2:
+            break;
+          case 3:
             window.close();
             break;
           }
+        } else if (event.key.code == Keyboard::Escape) {
+          window.close();
         }
       }
     }
@@ -475,6 +512,12 @@ void level1(RenderWindow &window) {
       watergirl.setPosition(Vector2f(77, 1110));
     }
 
+    // pause
+    if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
+      pausemenu.isActive = true;
+      drawPauseMenu(window);
+    }
+
     // exit when esc is pressed
     if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
       window.clear();
@@ -616,6 +659,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &lWall,
 void drawOptoinsMenu(RenderWindow &window) {
   // making menu options
   optionsMenu.font.loadFromFile("varsity_regular.ttf");
+  optionsMenu.size = 3;
 
   optionsMenu.mainmenu[0].setFont(menu.font);
   optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
@@ -644,7 +688,7 @@ void drawOptoinsMenu(RenderWindow &window) {
   bg.setTexture(background);
   bg.setScale(width / background.getSize().x, height / background.getSize().y);
 
-  while (window.isOpen()) {
+  while (optionsMenu.isActive && window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
@@ -672,6 +716,8 @@ void drawOptoinsMenu(RenderWindow &window) {
           case 2:
             window.clear();
             optionsMenu.setSelected(0);
+            optionsMenu.isActive = false;
+            menu.isActive = true;
             drawMenu(window);
             break;
           }
@@ -681,6 +727,62 @@ void drawOptoinsMenu(RenderWindow &window) {
     window.clear();
     window.draw(bg);
     optionsMenu.draw(window);
+    window.display();
+  }
+}
+
+void drawPauseMenu(RenderWindow &window) {
+
+  float menuwidth, menuheight;
+  menuheight = (height - height / 3) / 2;
+  menuwidth = (width - width / 3) / 2;
+
+  RectangleShape smallMenu(Vector2f(width / 3, height / 3));
+  smallMenu.setFillColor(Color::Black);
+  smallMenu.setPosition(menuwidth, menuheight);
+
+  pausemenu.font.loadFromFile("varsity_regular.ttf");
+  pausemenu.size = 2;
+
+  pausemenu.mainmenu[0].setFont(menu.font);
+  pausemenu.mainmenu[0].setFillColor(Color{204, 153, 0});
+  pausemenu.mainmenu[0].setString("Resume");
+  pausemenu.mainmenu[0].setCharacterSize(90);
+  pausemenu.mainmenu[0].setPosition(
+      Vector2f(getCenter(menu.mainmenu[0]), height / (4)));
+
+  pausemenu.mainmenu[1].setFont(menu.font);
+  pausemenu.mainmenu[1].setFillColor(Color::White);
+  pausemenu.mainmenu[1].setString("Exit");
+  pausemenu.mainmenu[1].setCharacterSize(90);
+  pausemenu.mainmenu[1].setPosition(
+      Vector2f(getCenter(pausemenu.mainmenu[1]), height / (4) + 100));
+
+  // it's working exept i doesn't show any thing yet.
+  // i have to add the options.
+  while (pausemenu.isActive) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Up) {
+          menu.MoveUp();
+        } else if (event.key.code == Keyboard::Down) {
+          menu.MoveDown();
+        } else if (event.key.code == Keyboard::Enter) {
+          switch (pausemenu.selected) {
+          case 0:
+            break;
+          case 1:
+            window.clear();
+            menu.setSelected(0);
+            break;
+          }
+        } else if (event.key.code == Keyboard::Escape) {
+          pausemenu.isActive = false;
+        }
+      }
+    }
+    window.draw(smallMenu);
     window.display();
   }
 }
