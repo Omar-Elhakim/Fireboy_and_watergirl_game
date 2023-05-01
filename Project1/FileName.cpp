@@ -1,4 +1,4 @@
-// notes :-
+// notes :-RenderWindow &window,RectangleShape &menu
 // for increasing performance change Keyboard evnets handling in the menu
 // functions to be like play function
 // cause it's a nested loop unlike the level1 func.
@@ -10,9 +10,12 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/System.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window.hpp>
+#include <ctime>
 #include <iostream>
 
 using namespace sf;
@@ -24,11 +27,14 @@ float width = 1210, height = 850;
 // for animation
 float gravity = 0.003, fireboy_Vy = 0, watergirl_Vy = 0;
 int x = 0, y = 0, a = 0;
+// getting the right coordinates to center Menu text
+float getCenter(Text text) {
+  return (width - text.getGlobalBounds().width) / 2;
+}
 
 struct Menu {
   bool isActive = false;
-  RectangleShape smallMenu;
-  // text array size but i won't make a dynamic array,
+  // dynamic text array size but i won't make a dynamic array,
   // for using in moving functions.
   int size;
   Font font;
@@ -41,7 +47,7 @@ struct Menu {
   }
   void MoveDown() {
     if (selected < size - 1) // not in exit (last option in the menu)
-     {
+    {
       mainmenu[selected].setFillColor(Color::White);
       selected++;
       mainmenu[selected].setFillColor(Color{255, 204, 0});
@@ -65,6 +71,42 @@ struct Menu {
   }
   void setSelected(int n) { selected = n; }
   int pressed() { return selected; }
+  void setcharsize(int n) {
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setCharacterSize(n);
+    }
+  }
+
+  void setTextPosition(int n) {
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setPosition(
+          Vector2f(getCenter(mainmenu[i]), height / (4) + n * i));
+    }
+  }
+  // big menu background
+  Texture background;
+  Sprite bg;
+  void setbackgroud(Texture &background, Sprite &bg) {
+    background.loadFromFile("TempleHallForest.png");
+    bg.setTexture(background);
+    bg.setScale(width / background.getSize().x,
+                height / background.getSize().y);
+  }
+
+  // small menus background
+  Texture sbackground;
+  Texture GameNameForest;
+  Sprite logo;
+  Sprite smenu;
+  void setsbackgroud() {
+    sbackground.loadFromFile("smallmenuback.png");
+    GameNameForest.loadFromFile("GameNameForest.png");
+    smenu.setTexture(sbackground);
+    logo.setTexture(GameNameForest);
+    smenu.setScale(Vector2f(0.8, 0.8));
+    logo.setPosition((width - GameNameForest.getSize().x) / 2, 50);
+    smenu.setPosition((width - (sbackground.getSize().x * 0.8)) / 2,50 + GameNameForest.getSize().y);
+  }
 } menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
 // define some functions
@@ -91,11 +133,6 @@ int main() {
   return 0;
 }
 
-// getting the right coordinates to center Menu text
-float getCenter(Text text) {
-  return (width - text.getGlobalBounds().width) / 2;
-}
-
 void drawMenu(RenderWindow &window) {
   // making menu options
   menu.font.loadFromFile("varsity_regular.ttf");
@@ -104,36 +141,22 @@ void drawMenu(RenderWindow &window) {
   menu.mainmenu[0].setFont(menu.font);
   menu.mainmenu[0].setFillColor(Color{204, 153, 0});
   menu.mainmenu[0].setString("Play");
-  menu.mainmenu[0].setCharacterSize(90);
-  menu.mainmenu[0].setPosition(
-      Vector2f(getCenter(menu.mainmenu[0]), height / (4)));
 
   menu.mainmenu[1].setFont(menu.font);
   menu.mainmenu[1].setFillColor(Color::White);
   menu.mainmenu[1].setString("Options");
-  menu.mainmenu[1].setCharacterSize(90);
-  menu.mainmenu[1].setPosition(
-      Vector2f(getCenter(menu.mainmenu[1]), height / (4) + 100));
 
   menu.mainmenu[2].setFont(menu.font);
   menu.mainmenu[2].setFillColor(Color::White);
   menu.mainmenu[2].setString("Credits");
-  menu.mainmenu[2].setCharacterSize(90);
-  menu.mainmenu[2].setPosition(
-      Vector2f(getCenter(menu.mainmenu[2]), height / (4) + 200));
 
   menu.mainmenu[3].setFont(menu.font);
   menu.mainmenu[3].setFillColor(Color::White);
   menu.mainmenu[3].setString("Exit");
-  menu.mainmenu[3].setCharacterSize(90);
-  menu.mainmenu[3].setPosition(
-      Vector2f(getCenter(menu.mainmenu[3]), height / (4) + 300));
 
-  Texture background;
-  background.loadFromFile("TempleHallForest.png");
-  Sprite bg;
-  bg.setTexture(background);
-  bg.setScale(width / background.getSize().x, height / background.getSize().y);
+  menu.setcharsize(90);
+  menu.setTextPosition(100);
+  menu.setbackgroud(menu.background, menu.bg);
 
   while (menu.isActive && window.isOpen()) {
     Event event;
@@ -175,14 +198,13 @@ void drawMenu(RenderWindow &window) {
       }
     }
     window.clear();
-    window.draw(bg);
+    window.draw(menu.bg);
     menu.draw(window);
     window.display();
   }
 }
 
 void level1(RenderWindow &window) {
-
   // stopwatch
   Clock gameClock;
   Font font;
@@ -212,23 +234,19 @@ void level1(RenderWindow &window) {
   backgroundTexture.loadFromFile("background.png");
   Sprite backgroundPic(backgroundTexture);
   backgroundPic.setScale(0.7f, 0.65f);
-  // backgroundPic.setPosition(Vector2f(-14, 10));
-  //
+
   // crating fireboy  diamonds
   Texture red1;
   red1.loadFromFile("redDiamond.png");
   // diamond1
   Sprite redDiamond1(red1);
   redDiamond1.setPosition(700.f, 60.f);
-
   // diamond 2
   Sprite redDiamond2(red1);
   redDiamond2.setPosition(600.f, 550.f);
-
   // diamond 3
   Sprite redDiamond3(red1);
   redDiamond3.setPosition(400.f, 80.f);
-
   // diamond 4
   Sprite redDiamond4(red1);
   redDiamond4.setPosition(760.f, 160.f);
@@ -239,15 +257,12 @@ void level1(RenderWindow &window) {
   // diamond1
   Sprite blueDiamond1(blue1);
   blueDiamond1.setPosition(200.f, 300.f);
-
   // diamond2
   Sprite blueDiamond2(blue1);
   blueDiamond2.setPosition(980.f, 600.f);
-
   // diamond3
   Sprite blueDiamond3(blue1);
   blueDiamond3.setPosition(55.f, 210.f);
-
   // diamond4
   Sprite blueDiamond4(blue1);
   blueDiamond4.setPosition(940.f, 170.f);
@@ -256,23 +271,19 @@ void level1(RenderWindow &window) {
   RectangleShape lava(Vector2f(130.f, 10.f));
   lava.setPosition(830.f, 1238.f);
   lava.setFillColor(Color(255, 0, 0, 0));
-
   // creating lake
   RectangleShape lake(Vector2f(145.f, 10.f));
   lake.setPosition(1165.f, 1238.f);
   lake.setFillColor(Color(0, 0, 255, 0));
-
   // creating green goo
   RectangleShape green_goo(Vector2f(190.f, 10.f));
   green_goo.setPosition(1060.f, 968.f);
   green_goo.setFillColor(Color(0, 255, 0));
-
   // creating two walls
   // left wall
   RectangleShape left_wall(Vector2f(10.f, 1800.f));
   left_wall.setPosition(20.f, 0);
   left_wall.setFillColor(Color(255, 255, 255));
-
   // right wall
   RectangleShape right_wall(Vector2f(10.f, 1800.f));
   right_wall.setPosition(1180.f, 0);
@@ -419,111 +430,128 @@ void level1(RenderWindow &window) {
   // main event
   Event ev;
 
+  int initialscnds = 0;
+  int initialmnts = 0;
   // Main Game loop
   while (window.isOpen()) {
-
     while (window.pollEvent(ev)) {
       if (ev.type == Event::Closed) {
         window.close();
       }
     }
 
-    // timer
-    Time gameTime = gameClock.getElapsedTime();
-    int minutes = gameTime.asSeconds() / 60;
-    int temp = gameTime.asSeconds();
-    int seconds = temp % 60;
-    timeText.setString(std::to_string(minutes) + ":" +
-                       (seconds < 10 ? "0" : "") + std::to_string(seconds));
+    if (!pausemenu.isActive) {
+      // timer
+      Time gameTime = gameClock.getElapsedTime();
+      int minutes = gameTime.asSeconds() / 60;
+      int temp = gameTime.asSeconds();
+      int seconds = temp % 60;
+      timeText.setString(std::to_string(minutes) + ":" +
+                         (seconds < 10 ? "0" : "") + std::to_string(seconds));
+      initialmnts = 0;
+      initialscnds = 0;
 
-    // move fireboy
-    Fmove(fireboy, right_wall, left_wall, ground);
+      // move fireboy
+      Fmove(fireboy, right_wall, left_wall, ground);
 
-    // fireboy diamonds
-    {
-      if (fireboy.getGlobalBounds().intersects(redDiamond1.getGlobalBounds())) {
-        redDiamond1.move(9999.f, 0.f);
-        diamond_sound.play();
+      // fireboy diamonds
+      {
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond1.getGlobalBounds())) {
+          redDiamond1.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond2.getGlobalBounds())) {
+          redDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond2.getGlobalBounds())) {
+          redDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond3.getGlobalBounds())) {
+          redDiamond3.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond4.getGlobalBounds())) {
+          redDiamond4.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
       }
-      if (fireboy.getGlobalBounds().intersects(redDiamond2.getGlobalBounds())) {
-        redDiamond2.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-      if (fireboy.getGlobalBounds().intersects(redDiamond2.getGlobalBounds())) {
-        redDiamond2.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-      if (fireboy.getGlobalBounds().intersects(redDiamond3.getGlobalBounds())) {
-        redDiamond3.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-      if (fireboy.getGlobalBounds().intersects(redDiamond4.getGlobalBounds())) {
-        redDiamond4.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-    }
 
-    // fireboy dying
-    if ((fireboy.getGlobalBounds().intersects(lake.getGlobalBounds())) ||
-        (fireboy.getGlobalBounds().intersects(green_goo.getGlobalBounds()))) {
-      fireboy.setPosition(Vector2f(-2000, 33330));
-      backgroundMusic.pause();
-      death_sound.play();
-    }
-
-    // watergirl movments
-    Wmove(watergirl, right_wall, left_wall, ground);
-
-    // watergirl diamonds
-    {
-      if (watergirl.getGlobalBounds().intersects(
-              blueDiamond1.getGlobalBounds())) {
-        blueDiamond1.move(9999.f, 0.f);
-        diamond_sound.play();
+      // fireboy dying
+      if ((fireboy.getGlobalBounds().intersects(lake.getGlobalBounds())) ||
+          (fireboy.getGlobalBounds().intersects(green_goo.getGlobalBounds()))) {
+        fireboy.setPosition(Vector2f(-2000, 33330));
+        backgroundMusic.pause();
+        death_sound.play();
       }
-      if (watergirl.getGlobalBounds().intersects(
-              blueDiamond2.getGlobalBounds())) {
-        blueDiamond2.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-      if (watergirl.getGlobalBounds().intersects(
-              blueDiamond3.getGlobalBounds())) {
-        blueDiamond3.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-      if (watergirl.getGlobalBounds().intersects(
-              blueDiamond4.getGlobalBounds())) {
-        blueDiamond4.move(9999.f, 0.f);
-        diamond_sound.play();
-      }
-    }
 
-    // watergirl death
-    if ((watergirl.getGlobalBounds().intersects(lava.getGlobalBounds())) ||
-        (watergirl.getGlobalBounds().intersects(green_goo.getGlobalBounds()))) {
-      watergirl.setPosition(Vector2f(-2000, 33330));
-      backgroundMusic.pause();
-      death_sound.play();
-    }
+      // watergirl movments
+      Wmove(watergirl, right_wall, left_wall, ground);
 
-    // retry
-    if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
-      fireboy.setPosition(Vector2f(77, 1110));
-      watergirl.setPosition(Vector2f(77, 1110));
-    }
+      // watergirl diamonds
+      {
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond1.getGlobalBounds())) {
+          blueDiamond1.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond2.getGlobalBounds())) {
+          blueDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond3.getGlobalBounds())) {
+          blueDiamond3.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond4.getGlobalBounds())) {
+          blueDiamond4.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+      }
 
-    // pause
-    if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
-      pausemenu.isActive = true;
+      // watergirl death
+      if ((watergirl.getGlobalBounds().intersects(lava.getGlobalBounds())) ||
+          (watergirl.getGlobalBounds().intersects(
+              green_goo.getGlobalBounds()))) {
+        watergirl.setPosition(Vector2f(-2000, 33330));
+        backgroundMusic.pause();
+        death_sound.play();
+      }
+
+      // retry
+      if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
+        fireboy.setPosition(Vector2f(77, 1110));
+        watergirl.setPosition(Vector2f(77, 1110));
+        gameClock.restart();
+      }
+
+      // pause
+      if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
+        initialscnds += seconds;
+        initialmnts += minutes;
+        pausemenu.isActive = true;
+        gameClock.restart();
+      }
+
+      // exit when esc is pressed
+      if (Keyboard::isKeyPressed(Keyboard::Key::Q)) {
+        window.clear();
+        menu.isActive = true;
+        drawMenu(window);
+      }
+    } else {
+      // if paused
       drawPauseMenu(window);
     }
-
-    // exit when esc is pressed
-    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-      window.clear();
-      drawMenu(window);
-    }
-
     // drawing
     {
       window.clear();
@@ -547,6 +575,9 @@ void level1(RenderWindow &window) {
       window.draw(fireboy);
       window.draw(watergirl);
       window.draw(timeText);
+      // if (pausemenu.isActive) {
+      //   window.draw(pausemenu.smenu);
+      // }
       window.display();
     }
   }
@@ -664,31 +695,20 @@ void drawOptoinsMenu(RenderWindow &window) {
   optionsMenu.mainmenu[0].setFont(menu.font);
   optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
   optionsMenu.mainmenu[0].setString("Music");
-  optionsMenu.mainmenu[0].setCharacterSize(90);
-  optionsMenu.mainmenu[0].setPosition(
-      Vector2f(getCenter(optionsMenu.mainmenu[0]), height / (4)));
 
   optionsMenu.mainmenu[1].setFont(menu.font);
   optionsMenu.mainmenu[1].setFillColor(Color::White);
   optionsMenu.mainmenu[1].setString("EFX");
-  optionsMenu.mainmenu[1].setCharacterSize(90);
-  optionsMenu.mainmenu[1].setPosition(
-      Vector2f(getCenter(optionsMenu.mainmenu[1]), height / (4) + 200));
 
   optionsMenu.mainmenu[2].setFont(menu.font);
   optionsMenu.mainmenu[2].setFillColor(Color::White);
   optionsMenu.mainmenu[2].setString("Back");
-  optionsMenu.mainmenu[2].setCharacterSize(90);
-  optionsMenu.mainmenu[2].setPosition(
-      Vector2f(getCenter(optionsMenu.mainmenu[2]), height / (4) + 400));
 
-  Texture background;
-  background.loadFromFile("TempleHallForest.png");
-  Sprite bg;
-  bg.setTexture(background);
-  bg.setScale(width / background.getSize().x, height / background.getSize().y);
+  optionsMenu.setcharsize(90);
+  optionsMenu.setTextPosition(200);
+  optionsMenu.setbackgroud(optionsMenu.background, optionsMenu.bg);
 
-  while (optionsMenu.isActive && window.isOpen()) {
+  while (optionsMenu.isActive) {
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
@@ -725,64 +745,21 @@ void drawOptoinsMenu(RenderWindow &window) {
       }
     }
     window.clear();
-    window.draw(bg);
+    window.draw(optionsMenu.bg);
     optionsMenu.draw(window);
     window.display();
   }
 }
 
 void drawPauseMenu(RenderWindow &window) {
-
-  float menuwidth, menuheight;
-  menuheight = (height - height / 3) / 2;
-  menuwidth = (width - width / 3) / 2;
-
-  RectangleShape smallMenu(Vector2f(width / 3, height / 3));
-  smallMenu.setFillColor(Color::Black);
-  smallMenu.setPosition(menuwidth, menuheight);
-
-  pausemenu.font.loadFromFile("varsity_regular.ttf");
-  pausemenu.size = 2;
-
-  pausemenu.mainmenu[0].setFont(menu.font);
-  pausemenu.mainmenu[0].setFillColor(Color{204, 153, 0});
-  pausemenu.mainmenu[0].setString("Resume");
-  pausemenu.mainmenu[0].setCharacterSize(90);
-  pausemenu.mainmenu[0].setPosition(
-      Vector2f(getCenter(menu.mainmenu[0]), height / (4)));
-
-  pausemenu.mainmenu[1].setFont(menu.font);
-  pausemenu.mainmenu[1].setFillColor(Color::White);
-  pausemenu.mainmenu[1].setString("Exit");
-  pausemenu.mainmenu[1].setCharacterSize(90);
-  pausemenu.mainmenu[1].setPosition(
-      Vector2f(getCenter(pausemenu.mainmenu[1]), height / (4) + 100));
-
-  // it's working exept i doesn't show any thing yet.
-  // i have to add the options.
+  pausemenu.setsbackgroud();
   while (pausemenu.isActive) {
-    Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == Event::KeyReleased) {
-        if (event.key.code == Keyboard::Up) {
-          menu.MoveUp();
-        } else if (event.key.code == Keyboard::Down) {
-          menu.MoveDown();
-        } else if (event.key.code == Keyboard::Enter) {
-          switch (pausemenu.selected) {
-          case 0:
-            break;
-          case 1:
-            window.clear();
-            menu.setSelected(0);
-            break;
-          }
-        } else if (event.key.code == Keyboard::Escape) {
-          pausemenu.isActive = false;
-        }
-      }
+    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+      window.clear();
+      pausemenu.isActive = false;
     }
-    window.draw(smallMenu);
+    window.draw(pausemenu.smenu);
+    window.draw(pausemenu.logo);
     window.display();
   }
 }
