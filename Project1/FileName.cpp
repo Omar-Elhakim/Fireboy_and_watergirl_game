@@ -9,7 +9,7 @@ int main() {
     RenderWindow window(VideoMode(1720, 1300), "Fireboy and Watergirl");
     
     Image icon;
-    icon.loadFromFile("icon.png");
+    icon.loadFromFile("assets/icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
    
     level1(window);
@@ -46,7 +46,7 @@ void level1(RenderWindow& window)
     // stopwatch
     Clock gameClock;
     Font font;
-    font.loadFromFile("font.ttf");
+    font.loadFromFile("assets/font.ttf");
     Text timeText;
     timeText.setFont(font);
     timeText.setCharacterSize(55);
@@ -55,25 +55,25 @@ void level1(RenderWindow& window)
 
     // background music
     Music backgroundMusic;
-    backgroundMusic.openFromFile("background-music.wav");
+    backgroundMusic.openFromFile("assets/background-music.wav");
     backgroundMusic.setLoop(true);
     //backgroundMusic.play();
     
     // death sound
     SoundBuffer death_buffer;
-    death_buffer.loadFromFile("Death.wav");
+    death_buffer.loadFromFile("assets/Death.wav");
     Sound death_sound;
     death_sound.setBuffer(death_buffer);
     
     // diamond sound
     SoundBuffer diamond_buffer;
-    diamond_buffer.loadFromFile("Diamond.wav");
+    diamond_buffer.loadFromFile("assets/Diamond.wav");
     Sound diamond_sound;
     diamond_sound.setBuffer(diamond_buffer);
 
     // background picture
     Texture backgroundTexture;
-    backgroundTexture.loadFromFile("background.png");
+    backgroundTexture.loadFromFile("assets/background.png");
     Sprite backgroundPic(backgroundTexture);
     backgroundPic.setScale(1.0f, 0.978f);
     scaleBackground(backgroundPic, window.getSize());
@@ -82,12 +82,12 @@ void level1(RenderWindow& window)
     RectangleShape box(Vector2f(60.0f, 60.0f));
     Texture boxtxt;
     box.setPosition(871.0F, 350.0F);
-    boxtxt.loadFromFile("box.png");
+    boxtxt.loadFromFile("assets/box.png");
     box.setTexture(&boxtxt);
 
     //crating fireboy  diamonds
     Texture red1;
-    red1.loadFromFile("redDiamond.png");
+    red1.loadFromFile("assets/redDiamond.png");
    
     //diamond1
     Sprite redDiamond1(red1);
@@ -115,7 +115,7 @@ void level1(RenderWindow& window)
 
     //crating watergirl  diamonds
     Texture blue1;
-    blue1.loadFromFile("blueDiamond.png");
+    blue1.loadFromFile("assets/blueDiamond.png");
    
     //diamond1
     Sprite blueDiamond1(blue1);
@@ -302,7 +302,7 @@ void level1(RenderWindow& window)
    
     //LEVER 373, 1223
     Texture lever;
-    lever.loadFromFile("lvr.png");
+    lever.loadFromFile("assets/lvr.png");
     RectangleShape lvr(Vector2f(20, 65));
     lvr.setTexture(&lever);
     lvr.setPosition(Vector2f(460, 886));
@@ -319,7 +319,7 @@ void level1(RenderWindow& window)
     
     //Elevator1 // the right one with the buttons
     Texture elvv;
-    elvv.loadFromFile("elev2.png");
+    elvv.loadFromFile("assets/elev2.png");
     Sprite elevator1;
     elevator1.setTexture(elvv);
     elevator1.setPosition(Vector2f(1500, 553));
@@ -334,7 +334,7 @@ void level1(RenderWindow& window)
    
     //ELEVATOR2 the left one with the lever
     Texture elv;
-    elv.loadFromFile("elev1.png");
+    elv.loadFromFile("assets/elev1.png");
     Sprite elevator2;
     elevator2.setTexture(elv);
     elevator2.setPosition(Vector2f(37, 673));
@@ -349,14 +349,14 @@ void level1(RenderWindow& window)
     
     // making and editing fireboy
     Texture text;
-    text.loadFromFile("fireboysheet.png");
+    text.loadFromFile("assets/fireboysheet.png");
     Sprite fireboy(text);
     fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 112));
     scaleFireboy(fireboy, window.getSize());
     
     // making and editing watergirl
     Texture texting;
-    texting.loadFromFile("watergirlsheet.png");
+    texting.loadFromFile("assets/watergirlsheet.png");
     Sprite watergirl(texting);
     watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
     scaleWatergirl(watergirl, window.getSize());
@@ -364,14 +364,14 @@ void level1(RenderWindow& window)
     //doors
     //fireboy door
 	Texture bdtexture;
-    bdtexture.loadFromFile("bdoor.png");
+    bdtexture.loadFromFile("assets/bdoor.png");
 	Sprite bdoor(bdtexture);
 	bdoor.setPosition(sf::Vector2f(1368.0f, 153.0f));
 	bdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
     
     //watergirl door
 	Texture gdtexture;
-	gdtexture.loadFromFile("gdoor.png");
+	gdtexture.loadFromFile("assets/gdoor.png");
 	Sprite gdoor(gdtexture);
 	gdoor.setPosition(sf::Vector2f(1500.0f, 153.0f));
 	gdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
