@@ -3,7 +3,35 @@
 
 using namespace sf;
 
-void level1(RenderWindow& window);
+struct Menu {
+  Font font;
+  Text mainmenu[3];
+  int selected = 0;
+  void draw(RenderWindow &window) {
+    for (int i = 0; i < 3; i++) {
+      window.draw(mainmenu[i]);
+    }
+  }
+  void MoveDown() {
+    if (selected < 2) // not in exit
+    {
+      mainmenu[selected].setFillColor(Color::White);
+      selected++;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    }
+  }
+  void MoveUp() {
+    if (selected > 0) // not in play
+    {
+      mainmenu[selected].setFillColor(Color::White);
+      selected--;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    }
+  }
+  int pressed() { return selected; }
+} menu, optionsMenu;
+
+void drawMenu(RenderWindow &window);
 
 int main() {
     RenderWindow window(VideoMode(1720, 1300), "Fireboy and Watergirl");
@@ -12,7 +40,7 @@ int main() {
     icon.loadFromFile("assets/icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
    
-    level1(window);
+    drawMenu(window);
     return 0;
 }
 
@@ -20,6 +48,8 @@ int main() {
 //slow computer: gravity =0.13 , moving speed = 3.5 , jumping =-5.5
 //fast computer: gravity = 0.035 moving speed = 0.5 , jumping =-0.9
 float gravity = 0.0035, fireboy_Vy = 0, watergirl_Vy = 0, box_Vy = 0;
+
+// define some functions
 
 // for animation
 int x = 0, y = 0, a = 0,f = 0, g = 0;
@@ -35,7 +65,77 @@ void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[], int s
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground);
 void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize);
 void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window);
+void drawOptoinsMenu(RenderWindow &window);
+void level1(RenderWindow &window);
 
+void drawMenu(RenderWindow &window) {
+  // making menu options
+  menu.font.loadFromFile("varsity_regular.ttf");
+
+  menu.mainmenu[0].setFont(menu.font);
+  menu.mainmenu[0].setFillColor(Color{204, 153, 0});
+  menu.mainmenu[0].setString("play");
+  menu.mainmenu[0].setCharacterSize(90);
+  menu.mainmenu[0].setPosition(Vector2f(width / (3), height / (4)));
+
+  menu.mainmenu[1].setFont(menu.font);
+  menu.mainmenu[1].setFillColor(Color::White);
+  menu.mainmenu[1].setString("options");
+  menu.mainmenu[1].setCharacterSize(90);
+  menu.mainmenu[1].setPosition(Vector2f(width / (3), height / (4) + 200));
+
+  menu.mainmenu[2].setFont(menu.font);
+  menu.mainmenu[2].setFillColor(Color::White);
+  menu.mainmenu[2].setString("exit");
+  menu.mainmenu[2].setCharacterSize(90);
+  menu.mainmenu[2].setPosition(Vector2f(width / (3), height / (4) + 400));
+
+  Texture background;
+  background.loadFromFile("TempleHallForest.png");
+  Sprite bg;
+  bg.setTexture(background);
+  bg.setScale(width / background.getSize().x, height / background.getSize().y);
+
+  while (window.isOpen()) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyPressed) {
+        if (event.key.code == Keyboard::Up) {
+          menu.MoveUp();
+        }
+        if (event.key.code == Keyboard::Down) {
+          menu.MoveDown();
+        }
+        if (event.key.code == Keyboard::Escape)
+          window.close();
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Enter) {
+          switch (menu.selected) {
+          case 0:
+            window.clear();
+            level1(window);
+            break;
+          case 1:
+            window.clear();
+            menu.selected--;
+            drawOptoinsMenu(window);
+            break;
+          case 2:
+            window.close();
+            break;
+          }
+        }
+      }
+    }
+    window.clear();
+    window.draw(bg);
+    menu.draw(window);
+    window.display();
+  }
+}
 
 void level1(RenderWindow& window)
 {
@@ -823,6 +923,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2, Recta
         y = 2;
         x = x % 4;
         fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
+
     }
     a == 0;
     //upwards
@@ -836,6 +937,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2, Recta
     }
     */
 }
+
 
 void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
     RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[], RectangleShape& box, Sprite& elevator1, Sprite& elevator2,Event event)
@@ -982,4 +1084,75 @@ void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window) {
     // scale the diamond position
     xPos *= xScale;
     yPos *= yScale;
+}
+
+void drawOptoinsMenu(RenderWindow &window) {
+  // making menu options
+  optionsMenu.font.loadFromFile("varsity_regular.ttf");
+
+  optionsMenu.mainmenu[0].setFont(menu.font);
+  optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
+  optionsMenu.mainmenu[0].setString("Music");
+  optionsMenu.mainmenu[0].setCharacterSize(90);
+  optionsMenu.mainmenu[0].setPosition(Vector2f(width / (3), height / (4)));
+
+  optionsMenu.mainmenu[1].setFont(menu.font);
+  optionsMenu.mainmenu[1].setFillColor(Color::White);
+  optionsMenu.mainmenu[1].setString("EFX");
+  optionsMenu.mainmenu[1].setCharacterSize(90);
+  optionsMenu.mainmenu[1].setPosition(
+      Vector2f(width / (3), height / (4) + 200));
+
+  optionsMenu.mainmenu[2].setFont(menu.font);
+  optionsMenu.mainmenu[2].setFillColor(Color::White);
+  optionsMenu.mainmenu[2].setString("Back");
+  optionsMenu.mainmenu[2].setCharacterSize(90);
+  optionsMenu.mainmenu[2].setPosition(
+      Vector2f(width / (3), height / (4) + 400));
+
+  Texture background;
+  background.loadFromFile("TempleHallForest.png");
+  Sprite bg;
+  bg.setTexture(background);
+
+  while (window.isOpen()) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyPressed) {
+        if (event.key.code == Keyboard::Up) {
+          optionsMenu.MoveUp();
+        }
+        if (event.key.code == Keyboard::Down) {
+          optionsMenu.MoveDown();
+        }
+        if (event.key.code == Keyboard::Escape) {
+          window.close();
+        }
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Enter) {
+          switch (optionsMenu.selected) {
+          case 0:
+            // place holder for the music settings function
+            break;
+          case 1:
+            // place holder for the EFX settings function
+            break;
+          case 2:
+            window.clear();
+            optionsMenu.selected--;
+            optionsMenu.selected--;
+            drawMenu(window);
+            break;
+          }
+        }
+      }
+    }
+    window.clear();
+    window.draw(bg);
+    optionsMenu.draw(window);
+    window.display();
+  }
 }
