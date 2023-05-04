@@ -49,11 +49,14 @@ int main() {
 //fast computer: gravity = 0.035 moving speed = 0.5 , jumping =-0.9
 float gravity = 0.0035, fireboy_Vy = 0, watergirl_Vy = 0, box_Vy = 0;
 
-// define some functions
+// setting width and height
+//float width = 1210, height = 850;
+float width = 1720,height=1300;
 
 // for animation
 int x = 0, y = 0, a = 0,f = 0, g = 0;
 
+// define some functions
 bool doesIntersectElevator(Sprite& player, Sprite& elevator1, Sprite& elevator2);
 void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2, RectangleShape& rWall3,
     RectangleShape& lWall, RectangleShape& lWall2, RectangleShape ground[],RectangleShape& box, Sprite& elevator1, Sprite& elevator2,Event event);
