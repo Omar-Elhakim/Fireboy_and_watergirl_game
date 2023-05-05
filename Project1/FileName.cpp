@@ -6,9 +6,6 @@
 // while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <iostream>
 
 // setting width and height
@@ -21,6 +18,7 @@ float getCenter(Text text) {
 }
 
 bool isrestarted = false;
+bool backMusicIsActive = true;
 
 struct Menu {
   bool isActive = false;
@@ -69,8 +67,8 @@ struct Menu {
 
   void setTextPosition(int n) {
     for (int i = 0; i < size; i++) {
-      mainmenu[i].setPosition(
-          Vector2f(getCenter(mainmenu[i]), height / (4) + (n * i) * (height / 850)));
+      mainmenu[i].setPosition(Vector2f(
+          getCenter(mainmenu[i]), height / (4) + (n * i) * (height / 850)));
     }
   }
   // big menu background
@@ -93,7 +91,8 @@ struct Menu {
     smenu.setTexture(sbackground);
     logo.setTexture(GameNameForest);
     smenu.setScale(Vector2f(0.8, 0.8));
-    logo.setPosition((width - GameNameForest.getSize().x) / 2, 50 * (height / 850));
+    logo.setPosition((width - GameNameForest.getSize().x) / 2,
+                     50 * (height / 850));
     smenu.setPosition((width - (sbackground.getSize().x * 0.8)) / 2,
                       50 * (height / 850) + GameNameForest.getSize().y);
   }
@@ -128,7 +127,7 @@ void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
 void drawOptoinsMenu(RenderWindow &window);
 void drawPauseMenu(RenderWindow &window);
-void drawLosingMenu(RenderWindow &window,Sprite &sprite);
+void drawLosingMenu(RenderWindow &window);
 void drawWinningMenu(RenderWindow &window);
 void drawCreditesMenu(RenderWindow &window);
 void level1(RenderWindow &window);
@@ -236,8 +235,9 @@ void level1(RenderWindow &window) {
   Music backgroundMusic;
   backgroundMusic.openFromFile("assets/background-music.wav");
   backgroundMusic.setLoop(true);
-  // backgroundMusic.play();
-
+  if (backMusicIsActive) {
+    backgroundMusic.play();
+  }
   // death sound
   SoundBuffer death_buffer;
   death_buffer.loadFromFile("assets/Death.wav");
@@ -576,7 +576,7 @@ void level1(RenderWindow &window) {
       // stopwatch
       Time gameTime = gameClock.getElapsedTime();
       int temp = gameTime.asSeconds();
-      if(initialscnds > 0){
+      if (initialscnds > 0) {
         gameClock.restart();
         temp += initialscnds;
         std::cout << "temp: " << temp << std::endl;
@@ -584,7 +584,6 @@ void level1(RenderWindow &window) {
       }
       int minutes = temp / 60;
       int seconds = temp % 60;
-
 
       timeText.setString(std::to_string(minutes) + ":" +
                          (seconds < 10 ? "0" : "") + std::to_string(seconds));
@@ -648,27 +647,66 @@ void level1(RenderWindow &window) {
             (fireboy.getGlobalBounds().intersects(
                 green_goo.getGlobalBounds()))) {
           fireboy.setPosition(Vector2f(-2000, 33330));
-          // backgroundMusic.pause();
+          backgroundMusic.pause();
           death_sound.play();
           losingmenu.isActive = true;
           gameClock.restart();
-          drawLosingMenu(window,fireboy);
+          window.clear();
+          window.draw(backgroundPic);
+          window.draw(lvr);
+          window.draw(elevator1);
+          window.draw(elevator2);
+          window.draw(box);
+          window.draw(redDiamond1);
+          window.draw(redDiamond2);
+          window.draw(redDiamond3);
+          window.draw(redDiamond4);
+          window.draw(blueDiamond1);
+          window.draw(blueDiamond2);
+          window.draw(blueDiamond3);
+          window.draw(blueDiamond4);
+          window.draw(bdoor);
+          window.draw(gdoor);
+          window.draw(fireboy);
+          window.draw(watergirl);
+          window.draw(timeText);
+          drawLosingMenu(window);
         }
         if ((watergirl.getGlobalBounds().intersects(lava.getGlobalBounds())) ||
             (watergirl.getGlobalBounds().intersects(
                 green_goo.getGlobalBounds()))) {
           watergirl.setPosition(Vector2f(-2000, 33330));
-          // backgroundMusic.pause();
+          backgroundMusic.pause();
           death_sound.play();
           losingmenu.isActive = true;
           gameClock.restart();
-          drawLosingMenu(window,watergirl);
+          // to hide fireboy and watergirl after dying
+          window.clear();
+          window.draw(backgroundPic);
+          window.draw(lvr);
+          window.draw(elevator1);
+          window.draw(elevator2);
+          window.draw(box);
+          window.draw(redDiamond1);
+          window.draw(redDiamond2);
+          window.draw(redDiamond3);
+          window.draw(redDiamond4);
+          window.draw(blueDiamond1);
+          window.draw(blueDiamond2);
+          window.draw(blueDiamond3);
+          window.draw(blueDiamond4);
+          window.draw(bdoor);
+          window.draw(gdoor);
+          window.draw(fireboy);
+          window.draw(watergirl);
+          window.draw(timeText);
+          drawLosingMenu(window);
         }
       }
 
       // pause
       if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
-        if (gameTime.asMilliseconds() > 0){
+        if (gameTime.asMilliseconds() > 0) {
           initialscnds = seconds;
           initialmnts = minutes;
         }
@@ -691,7 +729,7 @@ void level1(RenderWindow &window) {
           fireboy.setPosition(Vector2f(77, 1140));
           watergirl.setPosition(Vector2f(78, 953));
           isrestarted = false;
-          backgroundMusic.play();
+          // backgroundMusic.play();
         }
       }
 
@@ -897,32 +935,28 @@ void level1(RenderWindow &window) {
       drawPauseMenu(window);
     }
 
-    // drawing
-    {
-      window.clear();
-      window.draw(backgroundPic);
-      window.draw(lvr);
-      window.draw(elevator1);
-      window.draw(elevator2);
-      window.draw(box);
-      window.draw(redDiamond1);
-      window.draw(redDiamond2);
-      window.draw(redDiamond3);
-      window.draw(redDiamond4);
-      window.draw(blueDiamond1);
-      window.draw(blueDiamond2);
-      window.draw(blueDiamond3);
-      window.draw(blueDiamond4);
-      window.draw(bdoor);
-      window.draw(gdoor);
-      window.draw(fireboy);
-      window.draw(watergirl);
-      window.draw(timeText);
-      window.display();
-    }
+    window.clear();
+    window.draw(backgroundPic);
+    window.draw(lvr);
+    window.draw(elevator1);
+    window.draw(elevator2);
+    window.draw(box);
+    window.draw(redDiamond1);
+    window.draw(redDiamond2);
+    window.draw(redDiamond3);
+    window.draw(redDiamond4);
+    window.draw(blueDiamond1);
+    window.draw(blueDiamond2);
+    window.draw(blueDiamond3);
+    window.draw(blueDiamond4);
+    window.draw(bdoor);
+    window.draw(gdoor);
+    window.draw(fireboy);
+    window.draw(watergirl);
+    window.draw(timeText);
+    window.display();
   }
 }
-
 
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2) {
@@ -1297,10 +1331,10 @@ void drawPauseMenu(RenderWindow &window) {
   }
 }
 
-void drawWinningMenu(RenderWindow &window){
+void drawWinningMenu(RenderWindow &window) {
   winingmenu.setsbackgroud();
   while (winingmenu.isActive) {
-    if(Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
       window.clear();
       winingmenu.isActive = false;
     }
@@ -1310,15 +1344,14 @@ void drawWinningMenu(RenderWindow &window){
   }
 }
 
-void drawLosingMenu(RenderWindow &window,Sprite &sprite){
+void drawLosingMenu(RenderWindow &window) {
   losingmenu.setsbackgroud();
   while (losingmenu.isActive) {
-    if(Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
       window.clear();
       losingmenu.isActive = false;
       isrestarted = true;
     }
-    window.draw(sprite);
     window.draw(losingmenu.smenu);
     window.draw(losingmenu.logo);
     window.display();
