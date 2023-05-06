@@ -12,7 +12,7 @@
 #include <iostream>
 
 // setting width and height
-float width = 1920, height = 1080;
+float width = 1210, height = 850;
 //float width = 1720, height = 1300;
 
 using namespace sf;
