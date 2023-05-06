@@ -6,18 +6,19 @@
 // while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <iostream>
 
 // setting width and height
-// float width = 1210, height = 850;
-float width = 1720, height = 1300;
+float width = 1210, height = 850;
+// float width = 1720, height = 1300;
 
 using namespace sf;
 float getCenter(Text text) {
   return (width - text.getGlobalBounds().width) / 2;
 }
 
-bool isrestarted = false;
 bool backMusicIsActive = true;
 
 struct Menu {
@@ -26,7 +27,7 @@ struct Menu {
   // for using in moving functions.
   int size;
   Font font;
-  Text mainmenu[4];
+  Text mainmenu[7];
   int selected = 0;
   void draw(RenderWindow &window) {
     for (int i = 0; i < size; i++) {
@@ -68,7 +69,7 @@ struct Menu {
   void setTextPosition(int n) {
     for (int i = 0; i < size; i++) {
       mainmenu[i].setPosition(Vector2f(
-          getCenter(mainmenu[i]), height / (4) + (n * i) * (height / 850)));
+          getCenter(mainmenu[i]), height / (size) + (n * i) * (height / 850)));
     }
   }
   // big menu background
@@ -125,7 +126,7 @@ void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape &ground);
 void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
 void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
-void drawOptoinsMenu(RenderWindow &window);
+void drawOptionsMenu(RenderWindow &window);
 void drawPauseMenu(RenderWindow &window);
 void drawLosingMenu(RenderWindow &window);
 void drawWinningMenu(RenderWindow &window);
@@ -146,7 +147,7 @@ int main() {
 
 void drawMenu(RenderWindow &window) {
   // making menu options
-  menu.font.loadFromFile("varsity_regular.ttf");
+  menu.font.loadFromFile("assets/varsity_regular.ttf");
   menu.size = 4;
 
   menu.mainmenu[0].setFont(menu.font);
@@ -195,9 +196,14 @@ void drawMenu(RenderWindow &window) {
             menu.setSelected(0);
             optionsMenu.isActive = true;
             menu.isActive = false;
-            drawOptoinsMenu(window);
+            drawOptionsMenu(window);
             break;
           case 2:
+            window.clear();
+            menu.setSelected(0);
+            creditesmenu.isActive = true;
+            menu.isActive = false;
+            drawCreditesMenu(window);
             break;
           case 3:
             window.close();
@@ -723,16 +729,6 @@ void level1(RenderWindow &window) {
         drawMenu(window);
       }
 
-      // retry
-      {
-        if (isrestarted) {
-          fireboy.setPosition(Vector2f(77, 1140));
-          watergirl.setPosition(Vector2f(78, 953));
-          isrestarted = false;
-          // backgroundMusic.play();
-        }
-      }
-
       // zatoona
 
       // lever moving right and left
@@ -1254,9 +1250,9 @@ void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window) {
   yPos *= yScale;
 }
 
-void drawOptoinsMenu(RenderWindow &window) {
+void drawOptionsMenu(RenderWindow &window) {
   // making menu options
-  optionsMenu.font.loadFromFile("varsity_regular.ttf");
+  optionsMenu.font.loadFromFile("assets/varsity_regular.ttf");
   optionsMenu.size = 3;
 
   optionsMenu.mainmenu[0].setFont(menu.font);
@@ -1346,14 +1342,79 @@ void drawWinningMenu(RenderWindow &window) {
 
 void drawLosingMenu(RenderWindow &window) {
   losingmenu.setsbackgroud();
+  Event ev;
   while (losingmenu.isActive) {
-    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+    while (window.pollEvent(ev)) {
+      if (ev.type == Event::Closed) {
+        window.close();
+      }
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
       window.clear();
       losingmenu.isActive = false;
-      isrestarted = true;
+      level1(window);
     }
     window.draw(losingmenu.smenu);
     window.draw(losingmenu.logo);
+    window.display();
+  }
+}
+
+void drawCreditesMenu(RenderWindow &window) {
+  // making menu credits
+  creditesmenu.font.loadFromFile("assets/flame.ttf");
+  creditesmenu.size = 7;
+
+  creditesmenu.mainmenu[0].setFont(menu.font);
+  creditesmenu.mainmenu[0].setFillColor(Color::White);
+  creditesmenu.mainmenu[0].setString("OMAR EL-EZABY");
+
+  creditesmenu.mainmenu[1].setFont(menu.font);
+  creditesmenu.mainmenu[1].setFillColor(Color::White);
+  creditesmenu.mainmenu[1].setString("OMAR WATANY");
+
+  creditesmenu.mainmenu[2].setFont(menu.font);
+  creditesmenu.mainmenu[2].setFillColor(Color::White);
+  creditesmenu.mainmenu[2].setString("OMAR EL-HAKIM");
+
+  creditesmenu.mainmenu[3].setFont(menu.font);
+  creditesmenu.mainmenu[3].setFillColor(Color::White);
+  creditesmenu.mainmenu[3].setString("OMAR TEBRY");
+
+  creditesmenu.mainmenu[4].setFont(menu.font);
+  creditesmenu.mainmenu[4].setFillColor(Color::White);
+  creditesmenu.mainmenu[4].setString("OMAR IBRAHIM");
+
+  creditesmenu.mainmenu[5].setFont(menu.font);
+  creditesmenu.mainmenu[5].setFillColor(Color::White);
+  creditesmenu.mainmenu[5].setString("AHMED ALI");
+
+  creditesmenu.mainmenu[6].setFont(menu.font);
+  creditesmenu.mainmenu[6].setFillColor(Color::White);
+  creditesmenu.mainmenu[6].setString("KAREEM ABDEEN");
+
+  creditesmenu.setcharsize(90);
+  creditesmenu.setTextPosition(100);
+  creditesmenu.setbackgroud(creditesmenu.background, creditesmenu.bg);
+
+  while (creditesmenu.isActive) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Escape) {
+          window.clear();
+          creditesmenu.isActive = false;
+          menu.isActive = true;
+          drawMenu(window);
+        }
+      }
+    }
+    window.clear();
+    window.draw(creditesmenu.bg);
+    creditesmenu.draw(window);
     window.display();
   }
 }
