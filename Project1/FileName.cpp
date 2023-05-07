@@ -6,96 +6,103 @@
 // while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-
 #include <iostream>
 
 // setting width and height
+// float width = 1210, height = 850;
 float width = 1720, height = 1300;
 
 using namespace sf;
 float getCenter(Text text) {
-    return (width - text.getGlobalBounds().width) / 2;
+  return (width - text.getGlobalBounds().width) / 2;
 }
 
-bool isrestarted = false;
+bool backMusicIsActive = false;
 
 struct Menu {
-    bool isActive = false;
-    // dynamic text array size but i won't make a dynamic array,
-    // for using in moving functions.
-    int size;
-    Font font;
-    Text mainmenu[7];
-    int selected = 0;
-    void draw(RenderWindow& window) {
-        for (int i = 0; i < size; i++) {
-            window.draw(mainmenu[i]);
-        }
+  bool isActive = false;
+  // dynamic text array size but i won't make a dynamic array,
+  // for using in moving functions.
+  int size;
+  Font font;
+  Text mainmenu[7];
+  int selected = 0;
+  void draw(RenderWindow &window) {
+    for (int i = 0; i < size; i++) {
+      window.draw(mainmenu[i]);
     }
-    void MoveDown() {
-        if (selected < size - 1) // not in exit (last option in the menu)
-        {
-            mainmenu[selected].setFillColor(Color::White);
-            selected++;
-            mainmenu[selected].setFillColor(Color{ 255, 204, 0 });
-        }
-        else {
-            mainmenu[selected].setFillColor(Color::White);
-            selected = 0;
-            mainmenu[selected].setFillColor(Color{ 255, 204, 0 });
-        }
+  }
+  void MoveDown() {
+    if (selected < size - 1) // not in exit (last option in the menu)
+    {
+      mainmenu[selected].setFillColor(Color::White);
+      selected++;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    } else {
+      mainmenu[selected].setFillColor(Color::White);
+      selected = 0;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
-    void MoveUp() {
-        if (selected > 0) // not in play (first option in the menu)
-        {
-            mainmenu[selected].setFillColor(Color::White);
-            selected--;
-            mainmenu[selected].setFillColor(Color{ 255, 204, 0 });
-        }
-        else {
-            mainmenu[selected].setFillColor(Color::White);
-            selected = size - 1;
-            mainmenu[selected].setFillColor(Color{ 255, 204, 0 });
-        }
+  }
+  void MoveUp() {
+    if (selected > 0) // not in play (first option in the menu)
+    {
+      mainmenu[selected].setFillColor(Color::White);
+      selected--;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
+    } else {
+      mainmenu[selected].setFillColor(Color::White);
+      selected = size - 1;
+      mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
-    void setSelected(int n) { selected = n; }
-    int pressed() { return selected; }
-    void setcharsize(int n) {
-        for (int i = 0; i < size; i++) {
-            mainmenu[i].setCharacterSize(n);
-        }
+  }
+  void setSelected(int n) { selected = n; }
+  int pressed() { return selected; }
+  void setcharsize(int n) {
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setCharacterSize(n);
     }
+  }
+  void setTextFont(){
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setFont(font);
+    }
+  }
 
-    void setTextPosition(int n) {
-        for (int i = 0; i < size; i++) {
-            mainmenu[i].setPosition(
-                Vector2f(getCenter(mainmenu[i]), height / (size)+(n * i) * (height / 850)));
-        }
+  void setTextPosition(int n) {
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setPosition(Vector2f(
+          getCenter(mainmenu[i]),
+          ((height / 2) - (mainmenu[0].getGlobalBounds().height * size)) +
+              (i * (mainmenu[0].getGlobalBounds().height)) * 2));
     }
-    // big menu background
-    Texture background;
-    Sprite bg;
-    void setbackgroud(Texture& background, Sprite& bg) {
-        background.loadFromFile("assets/TempleHallForest.png");
-        bg.setTexture(background);
-        bg.setScale(width / background.getSize().x,
-            height / background.getSize().y);
-    }
-    // small menus background
-    Texture sbackground;
-    Texture GameNameForest;
-    Sprite logo;
-    Sprite smenu;
-    void setsbackgroud() {
-        sbackground.loadFromFile("assets/smallmenuback.png");
-        GameNameForest.loadFromFile("assets/GameNameForest.png");
-        smenu.setTexture(sbackground);
-        logo.setTexture(GameNameForest);
-        smenu.setScale(Vector2f(0.8, 0.8));
-        logo.setPosition((width - GameNameForest.getSize().x) / 2, 50 * (height / 850));
-        smenu.setPosition((width - (sbackground.getSize().x * 0.8)) / 2,
-            50 * (height / 850) + GameNameForest.getSize().y);
-    }
+  }
+  // big menu background
+  Texture background;
+  Sprite bg;
+  void setbackgroud(Texture &background, Sprite &bg) {
+    background.loadFromFile("assets/TempleHallForest.png");
+    bg.setTexture(background);
+    bg.setScale(width / background.getSize().x,
+                height / background.getSize().y);
+  }
+  // small menus background
+  Texture GameNameForest;
+  Sprite logo;
+  Texture sbackground;
+  Sprite smenu;
+  void setsbackgroud() {
+    sbackground.loadFromFile("assets/smallmenuback.png");
+    GameNameForest.loadFromFile("assets/GameNameForest.png");
+    smenu.setTexture(sbackground);
+    logo.setTexture(GameNameForest);
+    smenu.setScale(Vector2f(0.8 * (width / 1210), 0.8 * (height / 850)));
+    logo.setPosition((width - GameNameForest.getSize().x) / 2,
+                     50 * (height / 850));
+    smenu.setPosition((width - (sbackground.getSize().x * smenu.getScale().x)) /
+                          2,
+                      (50 + GameNameForest.getSize().y) * (height / 850));
+  }
 } menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
 // gravity
@@ -107,8 +114,8 @@ float gravity = 0.0035, fireboy_Vy = 0, watergirl_Vy = 0, box_Vy = 0;
 int x = 0, y = 0, a = 0, f = 0, g = 0;
 
 // define some functions
-bool doesIntersectElevator(Sprite& player, Sprite& elevator1,
-    Sprite& elevator2);
+bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
+                           Sprite &elevator2);
 void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
     RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
@@ -120,862 +127,881 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
     RectangleShape& lWall5, RectangleShape& lWall6, RectangleShape& lWall7,
     RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
-    Sprite& elevator1, Sprite& elevator2, Event event);
-void scaleFireboy(Sprite& sprite, const Vector2u& windowSize);
-void scaleWatergirl(Sprite& sprite, const Vector2u& windowSize);
+    Sprite& elevator1, Sprite& elevator2, Event event); 
+void scaleFireboy(Sprite &sprite, const Vector2u &windowSize);
+void scaleWatergirl(Sprite &sprite, const Vector2u &windowSize);
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
-    int size);
-void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground);
-void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize);
-void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window);
-void drawMenu(RenderWindow& window);
-void drawOptoinsMenu(RenderWindow& window);
-void drawPauseMenu(RenderWindow& window);
-void drawLosingMenu(RenderWindow& window, Sprite& sprite);
-void drawWinningMenu(RenderWindow& window);
-void drawCreditesMenu(RenderWindow& window);
-void level1(RenderWindow& window);
+                     int size);
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape &ground);
+void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
+void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
+void drawMenu(RenderWindow &window);
+void drawOptionsMenu(RenderWindow &window);
+void drawPauseMenu(RenderWindow &window);
+void drawLosingMenu(RenderWindow &window);
+void drawWinningMenu(RenderWindow &window);
+void drawCreditesMenu(RenderWindow &window);
+void level1(RenderWindow &window);
 
 int main() {
-    RenderWindow window(VideoMode(width, height), "Fireboy and Watergirl");
+  RenderWindow window(VideoMode(width, height), "Fireboy and Watergirl");
 
-    Image icon;
-    icon.loadFromFile("assets/icon.png");
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+  Image icon;
+  icon.loadFromFile("assets/icon.png");
+  window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
-    menu.isActive = true;
-    drawMenu(window);
-    return 0;
+  menu.isActive = true;
+  drawMenu(window);
+  return 0;
 }
 
-void drawMenu(RenderWindow& window) {
-    // making menu options
-    menu.font.loadFromFile("assets/varsity_regular.ttf");
-    menu.size = 4;
+void drawMenu(RenderWindow &window) {
+  // making menu options
+  menu.font.loadFromFile("assets/varsity_regular.ttf");
+  menu.size = 4;
 
-    menu.mainmenu[0].setFont(menu.font);
-    menu.mainmenu[0].setFillColor(Color{ 204, 153, 0 });
-    menu.mainmenu[0].setString("Play");
+  menu.mainmenu[0].setFillColor(Color{204, 153, 0});
+  menu.mainmenu[0].setString("Play");
 
-    menu.mainmenu[1].setFont(menu.font);
-    menu.mainmenu[1].setFillColor(Color::White);
-    menu.mainmenu[1].setString("Options");
+  menu.mainmenu[1].setFillColor(Color::White);
+  menu.mainmenu[1].setString("Options");
 
-    menu.mainmenu[2].setFont(menu.font);
-    menu.mainmenu[2].setFillColor(Color::White);
-    menu.mainmenu[2].setString("Credits");
+  menu.mainmenu[2].setFillColor(Color::White);
+  menu.mainmenu[2].setString("Credits");
 
-    menu.mainmenu[3].setFont(menu.font);
-    menu.mainmenu[3].setFillColor(Color::White);
-    menu.mainmenu[3].setString("Exit");
+  menu.mainmenu[3].setFillColor(Color::White);
+  menu.mainmenu[3].setString("Exit");
 
-    menu.setcharsize(90);
-    menu.setTextPosition(100);
-    menu.setbackgroud(menu.background, menu.bg);
+  menu.setTextFont();
+  menu.setcharsize(90);
+  menu.setTextPosition(100);
+  menu.setbackgroud(menu.background, menu.bg);
 
-    while (menu.isActive && window.isOpen()) {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-                break;
-            }
-            else if (event.type == Event::KeyPressed) {
-                if (event.key.code == Keyboard::Up) {
-                    menu.MoveUp();
-                }
-                if (event.key.code == Keyboard::Down) {
-                    menu.MoveDown();
-                }
-            }
-            else if (event.type == Event::KeyReleased) {
-                if (event.key.code == Keyboard::Enter) {
-                    switch (menu.selected) {
-                    case 0:
-                        window.clear();
-                        menu.isActive = false;
-                        level1(window);
-                        break;
-                    case 1:
-                        window.clear();
-                        menu.setSelected(0);
-                        optionsMenu.isActive = true;
-                        menu.isActive = false;
-                        drawOptoinsMenu(window);
-                        break;
-                    case 2:
-                        window.clear();
-                        menu.setSelected(0);
-                        creditesmenu.isActive = true;
-                        menu.isActive = false;
-                        drawCreditesMenu(window);
-                        break;
-                    case 3:
-                        window.close();
-                        break;
-                    }
-                }
-                else if (event.key.code == Keyboard::Escape) {
-                    window.close();
-                }
-            }
+  while (menu.isActive && window.isOpen()) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyPressed) {
+        if (event.key.code == Keyboard::Up) {
+          menu.MoveUp();
         }
-        window.clear();
-        window.draw(menu.bg);
-        menu.draw(window);
-        window.display();
-    }
-}
-
-void level1(RenderWindow& window) {
-    // Calculate the percentage of the window dimensions to use for scaling the
-    // grounds
-    float scaleX = (float)window.getSize().x / 1210.f;
-    float scaleY = (float)window.getSize().y / 850.f;
-
-    // stopwatch
-    Clock gameClock;
-    Font font;
-    font.loadFromFile("assets/font.ttf");
-    Text timeText;
-    timeText.setFont(font);
-    timeText.setCharacterSize(55);
-    timeText.setFillColor(sf::Color(255, 215, 0));
-    timeText.setPosition(780, 0);
-
-    // background music
-    Music backgroundMusic;
-    backgroundMusic.openFromFile("assets/background-music.wav");
-    backgroundMusic.setLoop(true);
-    // backgroundMusic.play();
-
-    // death sound
-    SoundBuffer death_buffer;
-    death_buffer.loadFromFile("assets/Death.wav");
-    Sound death_sound;
-    death_sound.setBuffer(death_buffer);
-
-    // diamond sound
-    SoundBuffer diamond_buffer;
-    diamond_buffer.loadFromFile("assets/Diamond.wav");
-    Sound diamond_sound;
-    diamond_sound.setBuffer(diamond_buffer);
-
-    // background picture
-    Texture backgroundTexture;
-    backgroundTexture.loadFromFile("assets/background.png");
-    Sprite backgroundPic(backgroundTexture);
-    backgroundPic.setScale(1.0f, 0.978f);
-    scaleBackground(backgroundPic, window.getSize());
-
-    // box
-    RectangleShape box(Vector2f(60.0f, 60.0f));
-    Texture boxtxt;
-    box.setPosition(871.0F, 350.0F);
-    boxtxt.loadFromFile("assets/box.png");
-    box.setTexture(&boxtxt);
-
-    // crating fireboy  diamonds
-    Texture red1;
-    red1.loadFromFile("assets/redDiamond.png");
-
-    // diamond1
-    Sprite redDiamond1(red1);
-    float x1 = 845.f, y1 = 1120.f;
-    scalePosition(x1, y1, window);
-    redDiamond1.setPosition(x1, y1);
-
-    // diamond 2
-    Sprite redDiamond2(red1);
-    float x2 = 270.f, y2 = 550.f;
-    scalePosition(x2, y2, window);
-    redDiamond2.setPosition(x2, y2);
-
-    // diamond 3
-    Sprite redDiamond3(red1);
-    float x3 = 400.f, y3 = 80.f;
-    scalePosition(x3, y3, window);
-    redDiamond3.setPosition(x3, y3);
-
-    // diamond 4
-    Sprite redDiamond4(red1);
-    float x4 = 760.f, y4 = 160.f;
-    scalePosition(x4, y4, window);
-    redDiamond4.setPosition(x4, y4);
-
-    // crating watergirl  diamonds
-    Texture blue1;
-    blue1.loadFromFile("assets/blueDiamond.png");
-
-    // diamond1
-    Sprite blueDiamond1(blue1);
-    float x5 = 1200.f, y5 = 1120.f;
-    scalePosition(x5, y5, window);
-    blueDiamond1.setPosition(x5, y5);
-
-    // diamond2
-    Sprite blueDiamond2(blue1);
-    float x6 = 980.f, y6 = 600.f;
-    scalePosition(x6, y6, window);
-    blueDiamond2.setPosition(x6, y6);
-
-    // diamond3
-    Sprite blueDiamond3(blue1);
-    float x7 = 55.f, y7 = 210.f;
-    scalePosition(x7, y7, window);
-    blueDiamond3.setPosition(x7, y7);
-
-    // diamond4
-    Sprite blueDiamond4(blue1);
-    float x8 = 940.f, y8 = 170.f;
-    scalePosition(x8, y8, window);
-    blueDiamond4.setPosition(x8, y8);
-
-    // creating lava
-    RectangleShape lava(Vector2f(118.f, 10.f));
-    lava.setPosition(838.f, 1238.f);
-    scaleRectangles(window.getSize(), lava);
-
-    // creating lake
-    RectangleShape lake(Vector2f(129.f, 10.f));
-    lake.setPosition(1173.f, 1238.f);
-    scaleRectangles(window.getSize(), lake);
-
-    // creating green goo
-    RectangleShape green_goo(Vector2f(105.f, 10.f));
-    green_goo.setPosition(1105.f, 968.f);
-    scaleRectangles(window.getSize(), green_goo);
-
-    // creating two walls
-    // left wall
-    RectangleShape left_wall(Vector2f(10.f, 1800.f));
-    left_wall.setPosition(20.f, 0);
-    left_wall.setFillColor(Color(255, 255, 255));
-
-    // right wall
-    RectangleShape right_wall(Vector2f(10.f, 1800.f));
-    right_wall.setPosition(window.getSize().x - 50, 0);
-    right_wall.setFillColor(Color(255, 255, 255));
-    // Creating grounds for each floor
-    RectangleShape ground[] = {
-        // ground floor
-        RectangleShape(Vector2f(1950.f, 10.f)),
-        // groundright
-        RectangleShape(Vector2f(10.f, 80.f)),
-        RectangleShape(Vector2f(10.f, 35.f)),
-        RectangleShape(Vector2f(40.f, 10.f)),
-        // top
-        RectangleShape(Vector2f(1950.f, 10.f)),
-        // floor1
-        RectangleShape(Vector2f(390.f, 30.f)),
-        // floor2 straight right
-        RectangleShape(Vector2f(500.f, 15.f)),
-        // floor2 inclined *******
-        RectangleShape(Vector2f(10.f, 70.f)),
-        // floor2 straight left
-        RectangleShape(Vector2f(530.f, 15.f)),
-        // floor3 straight right
-        RectangleShape(Vector2f(580.f, 20.f)),
-        // floor3 inclined ******
-        RectangleShape(Vector2f(10.f, 35.f)),
-        // floor3 straight left
-        RectangleShape(Vector2f(460.f, 20.f)),
-        // floor4 straight left
-        RectangleShape(Vector2f(1050.f, 30.f)),
-        // floor4 straight right
-        RectangleShape(Vector2f(240.f, 10.f)),
-        // floor4 middle obstacle straight up
-        RectangleShape(Vector2f(225.f, 10.f)),
-        // floor4 top of square left
-        RectangleShape(Vector2f(155.f, 10.f)),
-        // floor4 width of square left
-        RectangleShape(Vector2f(10.f, 90.f)),
-        // floor4 middle obstacle left
-        RectangleShape(Vector2f(10.f, 50.f)),
-        // floor4 middle obstacle incline *****
-        RectangleShape(Vector2f(10.f, 55.f)),
-        // floor5 middle straight
-        RectangleShape(Vector2f(420.f, 10.f)),
-        // floor5 straight right
-        RectangleShape(Vector2f(250.f, 10.f)),
-        // floor5 middle right incline
-        RectangleShape(Vector2f(10.f, 35.f)),
-        // floor5 middle left incline
-        RectangleShape(Vector2f(10.f, 35.f)),
-        // floor5 middle up straight
-        RectangleShape(Vector2f(80.f, 10.f)),
-        // floor5 left obstacle
-        RectangleShape(Vector2f(10.f, 35.f)),
-        RectangleShape(Vector2f(10.f, 35.f)),
-        RectangleShape(Vector2f(50.f, 10.f)),
-        RectangleShape(Vector2f(70.f, 10.f)),
-        RectangleShape(Vector2f(10.f, 20.f)),
-    };
-
-    // ground editing
-    {
-        // ground floor
-        ground[0].setPosition(0.f, 815.f);
-        // groundright
-        ground[1].setPosition(1090.f, 750.f); // small right wall
-        ground[2].setPosition(1115.f, 730.f);
-        ground[2].setRotation(45);
-        ground[3].setPosition(1125.f, 730.f);
-        // top
-        ground[4].setPosition(0.f, 35.f);
-        // floor1
-        ground[5].setPosition(0.f, 700.f);
-        // floor2 straight right
-        ground[6].setPosition(540.f, 650.f);
-        // floor2 inclined
-        //***
-        ground[7].setPosition(530.f, 595.f);
-        //ground[7].setRotation(-45);
-        // floor2 straight left
-        ground[8].setPosition(-5.f, 585.f);
-        // floor3 straight right
-        ground[9].setPosition(620.f, 470.f);
-        // floor3 inclined
-        //****
-        ground[10].setPosition(610.f, 450.f);
-        //ground[10].setRotation(-45);
-        // floor3 straight left
-        ground[11].setPosition(160.f, 440.f);
-        // floor4 straight left
-        ground[12].setPosition(0.f, 320.f);
-        // floor4 straight right
-        ground[13].setPosition(810.f, 330.f);
-        // floor4 middle obstacle straight up
-        ground[14].setPosition(590.f, 270.f);
-        // floor4 top of square left
-        ground[15].setPosition(0.f, 215.f);
-        // floor4 width of square left
-        ground[16].setPosition(160.f, 225.f); // small  left wall
-        // floor4 middle obstacle left
-        ground[17].setPosition(595.f, 290.f); // small right wall up
-        // floor4 middle obstacle incline 
-        //****
-        ground[18].setPosition(805.f, 280.f);
-        //ground[18].setRotation(-45);
-        // floor5 middle straight
-        ground[19].setPosition(430.f, 185.f);
-        // floor5 straight right
-        ground[20].setPosition(930.f, 185.f);
-        // floor5 middle right incline
-        //****
-        ground[21].setPosition(920.f, 160.f);
-        //ground[21].setRotation(-45);
-        // floor5 middle left incline
-        //*****
-        ground[22].setPosition(845.f, 160.f);
-        //ground[22].setRotation(45);
-        // floor5 middle up straight
-        ground[23].setPosition(850.f, 155.f);
-        // floor5 left obstacle
-        //***
-        ground[24].setPosition(430.f, 170.f);
-        //ground[24].setRotation(-45);
-        //****
-        ground[25].setPosition(365.f, 150.f);
-        //ground[25].setRotation(-45);
-        ground[26].setPosition(380.f, 165.f);
-        ground[27].setPosition(310.f, 135.f);
-        //****
-        ground[28].setPosition(290.f, 135.f);
-        //ground[28].setRotation(45);
-
-    }
-    scaleRectangles(window.getSize(), ground, 29);
-    ground[28].setPosition(-300, 0);
-    // zatoona
-
-    // button1
-    RectangleShape butt1(Vector2f(18, 18));
-    butt1.setPosition(Vector2f(463, 646));
-
-    // button2
-    RectangleShape butt2(Vector2f(18, 18));
-    butt2.setPosition(Vector2f(1311, 477));
-
-    // LEVER 373, 1223
-    Texture lever;
-    lever.loadFromFile("assets/lever.png");
-    RectangleShape lvr(Vector2f(20, 65));
-    lvr.setTexture(&lever);
-    lvr.setPosition(Vector2f(460, 886));
-    lvr.setOrigin(
-        Vector2f(lvr.getLocalBounds().width, lvr.getLocalBounds().height) /
-        1.05f);
-    lvr.setRotation(45);
-    
-    ////starting position of the lever////
-    RectangleShape stlvr(Vector2f(5, 40));
-    stlvr.setPosition(Vector2f(479, 867));
-
-    ////end position of the lever////
-    RectangleShape endlvr(Vector2f(5, 40));
-    endlvr.setPosition(Vector2f(417, 867));
-
-    // Elevator1 // the right one with the buttons
-    Texture elvv;
-    elvv.loadFromFile("assets/elev2.png");
-    Sprite elevator1;
-    elevator1.setTexture(elvv);
-    elevator1.setPosition(Vector2f(1500, 495));
-
-    // Elevator1 START fo2
-    RectangleShape STRTelv1(Vector2f(160, 5));
-    STRTelv1.setPosition(1500, 490);
-
-    // Elevator1   END t7t
-    RectangleShape ENDelv1(Vector2f(160, 5));
-    ENDelv1.setPosition(1500, 704);
-
-    // ELEVATOR2 the left one with the lever
-    Texture elv;
-    elv.loadFromFile("assets/elev1.png");
-    Sprite elevator2;
-    elevator2.setTexture(elv);
-    elevator2.setPosition(Vector2f(37, 673));
-
-    // Elevator 2 START FO2
-    RectangleShape STRTelv2(Vector2f(160, 5));
-    STRTelv2.setPosition(37, 673);
-
-    // ELEVATOR2 END t7t
-    RectangleShape ENDelv2(Vector2f(160, 5));
-    ENDelv2.setPosition(37, 840);
-
-    // making and editing fireboy
-    Texture text;
-    text.loadFromFile("assets/fireboysheet.png");
-    Sprite fireboy(text);
-    fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 112));
-    scaleFireboy(fireboy, window.getSize());
-
-    // making and editing watergirl
-    Texture texting;
-    texting.loadFromFile("assets/watergirlsheet.png");
-    Sprite watergirl(texting);
-    watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
-    scaleWatergirl(watergirl, window.getSize());
-
-    // doors
-    // fireboy door
-    Texture bdtexture;
-    bdtexture.loadFromFile("assets/bdoor.png");
-    Sprite bdoor(bdtexture);
-    bdoor.setPosition(sf::Vector2f(1368.0f, 153.0f));
-    bdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
-
-    // watergirl door
-    Texture gdtexture;
-    gdtexture.loadFromFile("assets/gdoor.png");
-    Sprite gdoor(gdtexture);
-    gdoor.setPosition(sf::Vector2f(1500.0f, 153.0f));
-    gdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
-    Clock clock;
-
-    // main event
-    Event ev;
-
-    int initialscnds = 0;
-    int initialmnts = 0;
-    // Main Game loop
-    while (window.isOpen()) {
-
-        while (window.pollEvent(ev)) {
-            if (ev.type == Event::Closed) {
-                window.close();
-            }
+        if (event.key.code == Keyboard::Down) {
+          menu.MoveDown();
         }
-        if (!pausemenu.isActive && !winingmenu.isActive && !losingmenu.isActive) {
-
-            // stopwatch
-            Time gameTime = gameClock.getElapsedTime();
-            int temp = gameTime.asSeconds();
-            if (initialscnds > 0) {
-                gameClock.restart();
-                temp += initialscnds;
-                std::cout << "temp: " << temp << std::endl;
-                initialscnds = 0;
-            }
-            int minutes = temp / 60;
-            int seconds = temp % 60;
-
-
-            timeText.setString(std::to_string(minutes) + ":" +
-                (seconds < 10 ? "0" : "") + std::to_string(seconds));
-
-            // fireboy diamonds
-            {
-                if (fireboy.getGlobalBounds().intersects(
-                    redDiamond1.getGlobalBounds())) {
-                    redDiamond1.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (fireboy.getGlobalBounds().intersects(
-                    redDiamond2.getGlobalBounds())) {
-                    redDiamond2.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (fireboy.getGlobalBounds().intersects(
-                    redDiamond2.getGlobalBounds())) {
-                    redDiamond2.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (fireboy.getGlobalBounds().intersects(
-                    redDiamond3.getGlobalBounds())) {
-                    redDiamond3.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (fireboy.getGlobalBounds().intersects(
-                    redDiamond4.getGlobalBounds())) {
-                    redDiamond4.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-            }
-
-            // watergirl diamonds
-            {
-                if (watergirl.getGlobalBounds().intersects(
-                    blueDiamond1.getGlobalBounds())) {
-                    blueDiamond1.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (watergirl.getGlobalBounds().intersects(
-                    blueDiamond2.getGlobalBounds())) {
-                    blueDiamond2.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (watergirl.getGlobalBounds().intersects(
-                    blueDiamond3.getGlobalBounds())) {
-                    blueDiamond3.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-                if (watergirl.getGlobalBounds().intersects(
-                    blueDiamond4.getGlobalBounds())) {
-                    blueDiamond4.move(9999.f, 0.f);
-                    diamond_sound.play();
-                }
-            }
-
-            // fireboy and watergirl death
-            {
-                if ((fireboy.getGlobalBounds().intersects(lake.getGlobalBounds())) ||
-                    (fireboy.getGlobalBounds().intersects(
-                        green_goo.getGlobalBounds()))) {
-                    fireboy.setPosition(Vector2f(-2000, 33330));
-                    backgroundMusic.pause();
-                    death_sound.play();
-                    losingmenu.isActive = true;
-                    gameClock.restart();
-                    drawLosingMenu(window, fireboy);
-                }
-                if ((watergirl.getGlobalBounds().intersects(lava.getGlobalBounds())) ||
-                    (watergirl.getGlobalBounds().intersects(
-                        green_goo.getGlobalBounds()))) {
-                    watergirl.setPosition(Vector2f(-2000, 33330));
-                    backgroundMusic.pause();
-                    death_sound.play();
-                    losingmenu.isActive = true;
-                    gameClock.restart();
-                    drawLosingMenu(window, watergirl);
-                }
-            }
-
-            // pause
-            if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
-                if (gameTime.asMilliseconds() > 0) {
-                    initialscnds = seconds;
-                    initialmnts = minutes;
-                }
-                std::cout << "inits: " << initialscnds << std::endl;
-                std::cout << "initm: " << initialmnts << std::endl;
-                pausemenu.isActive = true;
-                gameClock.restart();
-            }
-
-            // exit when esc is pressed
-            if (Keyboard::isKeyPressed(Keyboard::Key::Q)) {
-                window.clear();
-                menu.isActive = true;
-                drawMenu(window);
-            }
-
-            // retry
-            {
-                if (isrestarted) {
-                    fireboy.setPosition(Vector2f(77, 1140));
-                    watergirl.setPosition(Vector2f(78, 953));
-                    isrestarted = false;
-                    backgroundMusic.play();
-                }
-            }
-
-            // zatoona
-
-            // lever moving right and left
-            {
-                if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) ||
-                    (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-                    if (((fireboy.getGlobalBounds().intersects(
-                        stlvr.getGlobalBounds())) &&
-                        (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) ||
-                        ((watergirl.getGlobalBounds().intersects(
-                            stlvr.getGlobalBounds())) &&
-                            (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))))
-
-                    {
-                        lvr.rotate(-90);
-                    }
-                }
-                if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) ||
-                    (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-                    if (((fireboy.getGlobalBounds().intersects(
-                        endlvr.getGlobalBounds())) &&
-                        (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) ||
-                        ((watergirl.getGlobalBounds().intersects(
-                            endlvr.getGlobalBounds())) &&
-                            (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))))
-
-                    {
-                        lvr.rotate(90);
-                    }
-                }
-            }
-
-            // elevator2 moves with the lever
-            {
-                if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) &&
-                    ((!elevator2.getGlobalBounds().intersects(
-                        ENDelv2.getGlobalBounds())))) {
-                    elevator2.move(0, 0.5);
-                }
-                if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) &&
-                    ((!elevator2.getGlobalBounds().intersects(
-                        STRTelv2.getGlobalBounds())))) {
-                    elevator2.move(0, -1);
-                    if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
-                        fireboy.move(0, -1);
-                    }
-                    if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
-                        watergirl.move(0, -1);
-                    }
-                }
-            }
-
-            // elevator1 moves with the buttons
-            {
-                if ((((fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) ||
-                    (fireboy.getGlobalBounds().intersects(
-                        butt2.getGlobalBounds()))) ||
-                    ((watergirl.getGlobalBounds().intersects(
-                        butt1.getGlobalBounds())) ||
-                        (watergirl.getGlobalBounds().intersects(
-                            butt2.getGlobalBounds())))) &&
-                    (!elevator1.getGlobalBounds().intersects(
-                        ENDelv1.getGlobalBounds()))) {
-                    elevator1.move(0, 0.5);
-                }
-                if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) &&
-                    (!fireboy.getGlobalBounds().intersects(
-                        butt2.getGlobalBounds()))) &&
-                    ((!watergirl.getGlobalBounds().intersects(
-                        butt1.getGlobalBounds())) &&
-                        (!watergirl.getGlobalBounds().intersects(
-                            butt2.getGlobalBounds()))) &&
-                    (!elevator1.getGlobalBounds().intersects(
-                        STRTelv1.getGlobalBounds()))) {
-                    elevator1.move(0, -1);
-                    if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
-                        fireboy.move(0, -1.5);
-                    }
-                    if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
-                        watergirl.move(0, -1.5);
-                    }
-                }
-            }
-
-            // sprites not walking through the lever
-            {
-                if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-                    if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) &&
-                        ((fireboy.getGlobalBounds().intersects(
-                            endlvr.getGlobalBounds())))) {
-                        fireboy.move(-5, 0);
-                    }
-                    else if ((fireboy.getGlobalBounds().intersects(
-                        lvr.getGlobalBounds())) &&
-                        ((fireboy.getGlobalBounds().intersects(
-                            stlvr.getGlobalBounds())))) {
-                        fireboy.move(5, 0);
-                    }
-                }
-                if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
-                    if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) &&
-                        ((watergirl.getGlobalBounds().intersects(
-                            endlvr.getGlobalBounds())))) {
-                        watergirl.move(-5, 0);
-                    }
-                    else if ((watergirl.getGlobalBounds().intersects(
-                        lvr.getGlobalBounds())) &&
-                        ((watergirl.getGlobalBounds().intersects(
-                            stlvr.getGlobalBounds())))) {
-                        watergirl.move(5, 0);
-                    }
-                }
-            }
-
-            // box
-            {
-                // box gravity
-                if ((!box.getGlobalBounds().intersects(ground[14].getGlobalBounds())) &&
-                    (!box.getGlobalBounds().intersects(ground[12].getGlobalBounds()))) {
-                    box_Vy += gravity;
-                }
-                else {
-                    box_Vy = 0;
-                }
-                box.move(0, box_Vy);
-
-                // box movements with fireboy
-                if (Keyboard::isKeyPressed(Keyboard::Key::Right) &&
-                    fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-                    !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
-                    (fireboy.getPosition().x+100 < box.getPosition().x)) {
-                    box.move(0.5, 0);
-                }
-                else if (fireboy.getGlobalBounds().intersects(
-                    box.getGlobalBounds()) &&
-                    !box.getGlobalBounds().intersects(
-                        ground[16].getGlobalBounds()) &&
-                    Keyboard::isKeyPressed(Keyboard::Key::Left) &&
-                    (fireboy.getPosition().x+ 105 > box.getPosition().x)) {
-                    box.move(-0.5, 0);
-                }
-
-                // box movements with watergirl
-                if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
-                    watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-                    !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
-                    (watergirl.getPosition().x + 105< box.getPosition().x)) {
-                    box.move(0.5, 0);
-                }
-                else if (watergirl.getGlobalBounds().intersects(
-                    box.getGlobalBounds()) &&
-                    !box.getGlobalBounds().intersects(
-                        ground[16].getGlobalBounds()) &&
-                    Keyboard::isKeyPressed(Keyboard::Key::A) &&
-                    (watergirl.getPosition().x  + 105> box.getPosition().x)) {
-                    box.move(-0.5, 0);
-                }
-            }
-
-            Fmove(fireboy, right_wall, ground[1], ground[17], ground[22],
-                left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
-                ground[24], ground[25], ground, box, elevator1, elevator2, ev);
-
-            // watergirl moving function
-            Wmove(watergirl, right_wall, ground[1], ground[17], ground[22],
-                left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
-                ground[24], ground[25], ground, box, elevator1, elevator2, ev);
-            // doors mechanism
-            {
-                if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds())) {
-
-                    if (f < 8) {
-                        if (clock.getElapsedTime().asSeconds() >= 0.15) {
-                            f++;
-                            clock.restart();
-                        }
-
-                        bdoor.setTextureRect(sf::IntRect(0, f * 173, 110, 130));
-                    }
-                }
-                if (watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds())) {
-
-                    if (g < 8) {
-                        if (clock.getElapsedTime().asSeconds() >= 0.15) {
-                            g++;
-                            clock.restart();
-                        }
-                        gdoor.setTextureRect(sf::IntRect(0, g * 158, 110, 130));
-                    }
-                }
-               
-            }
-            // winnig
-            {
-                if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds()) &&
-                    watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds()) &&
-                    f == 8 && g == 8) {
-                    fireboy.setPosition(-100, 0);
-                    watergirl.setPosition(-100, 0);
-                    winingmenu.isActive = true;
-                    drawWinningMenu(window);
-                }
-            }
-        }
-        else {
-            // if paused
-            drawPauseMenu(window);
-        }
-
-        // drawing
-        {
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Enter) {
+          switch (menu.selected) {
+          case 0:
             window.clear();
-            window.draw(backgroundPic);
-            window.draw(lvr);
-            window.draw(elevator1);
-            window.draw(elevator2);
-            window.draw(box);
-            window.draw(redDiamond1);
-            window.draw(redDiamond2);
-            window.draw(redDiamond3);
-            window.draw(redDiamond4);
-            window.draw(blueDiamond1);
-            window.draw(blueDiamond2);
-            window.draw(blueDiamond3);
-            window.draw(blueDiamond4);
-            window.draw(bdoor);
-            window.draw(gdoor);
-            window.draw(fireboy);
-            window.draw(watergirl);
-            window.draw(timeText);
-            window.display();
+            menu.isActive = false;
+            level1(window);
+            break;
+          case 1:
+            window.clear();
+            menu.setSelected(0);
+            optionsMenu.isActive = true;
+            menu.isActive = false;
+            drawOptionsMenu(window);
+            break;
+          case 2:
+            window.clear();
+            menu.setSelected(0);
+            creditesmenu.isActive = true;
+            menu.isActive = false;
+            drawCreditesMenu(window);
+            break;
+          case 3:
+            window.close();
+            break;
+          }
+        } else if (event.key.code == Keyboard::Escape) {
+          window.close();
         }
+      }
     }
+    window.clear();
+    window.draw(menu.bg);
+    menu.draw(window);
+    window.display();
+  }
 }
 
+void level1(RenderWindow &window) {
+  // Calculate the percentage of the window dimensions to use for scaling the
+  // grounds
+  float scaleX = (float)window.getSize().x / 1210.f;
+  float scaleY = (float)window.getSize().y / 850.f;
 
-bool doesIntersectElevator(Sprite& player, Sprite& elevator1,
-    Sprite& elevator2) {
-    // checking for collision with the right elevator
-    if (player.getPosition().y + player.getGlobalBounds().height >=
-        elevator1.getPosition().y &&
-        player.getPosition().y + player.getGlobalBounds().height <=
-        elevator1.getPosition().y + elevator1.getGlobalBounds().height &&
-        player.getPosition().x + player.getGlobalBounds().width >
-        elevator1.getPosition().x &&
-        player.getPosition().x <
-        elevator1.getPosition().x + elevator1.getGlobalBounds().width) {
-        return true;
+  // stopwatch
+  Clock gameClock;
+  Font font;
+  font.loadFromFile("assets/font.ttf");
+  Text timeText;
+  timeText.setFont(font);
+  timeText.setCharacterSize(55);
+  timeText.setFillColor(sf::Color(255, 215, 0));
+  timeText.setPosition(780, 0);
+
+  // background music
+  Music backgroundMusic;
+  backgroundMusic.openFromFile("assets/background-music.wav");
+  backgroundMusic.setLoop(true);
+  if (backMusicIsActive) {
+    backgroundMusic.play();
+  }
+  // death sound
+  SoundBuffer death_buffer;
+  death_buffer.loadFromFile("assets/Death.wav");
+  Sound death_sound;
+  death_sound.setBuffer(death_buffer);
+
+  // diamond sound
+  SoundBuffer diamond_buffer;
+  diamond_buffer.loadFromFile("assets/Diamond.wav");
+  Sound diamond_sound;
+  diamond_sound.setBuffer(diamond_buffer);
+
+  // background picture
+  Texture backgroundTexture;
+  backgroundTexture.loadFromFile("assets/background.png");
+  Sprite backgroundPic(backgroundTexture);
+  backgroundPic.setScale(1.0f, 0.978f);
+  scaleBackground(backgroundPic, window.getSize());
+
+  // box
+  RectangleShape box(Vector2f(60.0f, 60.0f));
+  Texture boxtxt;
+  box.setPosition(871.0F, 350.0F);
+  boxtxt.loadFromFile("assets/box.png");
+  box.setTexture(&boxtxt);
+
+  // crating fireboy  diamonds
+  Texture red1;
+  red1.loadFromFile("assets/redDiamond.png");
+
+  // diamond1
+  Sprite redDiamond1(red1);
+  float x1 = 845.f, y1 = 1120.f;
+  scalePosition(x1, y1, window);
+  redDiamond1.setPosition(x1, y1);
+
+  // diamond 2
+  Sprite redDiamond2(red1);
+  float x2 = 270.f, y2 = 550.f;
+  scalePosition(x2, y2, window);
+  redDiamond2.setPosition(x2, y2);
+
+  // diamond 3
+  Sprite redDiamond3(red1);
+  float x3 = 400.f, y3 = 80.f;
+  scalePosition(x3, y3, window);
+  redDiamond3.setPosition(x3, y3);
+
+  // diamond 4
+  Sprite redDiamond4(red1);
+  float x4 = 760.f, y4 = 160.f;
+  scalePosition(x4, y4, window);
+  redDiamond4.setPosition(x4, y4);
+
+  // crating watergirl  diamonds
+  Texture blue1;
+  blue1.loadFromFile("assets/blueDiamond.png");
+
+  // diamond1
+  Sprite blueDiamond1(blue1);
+  float x5 = 1200.f, y5 = 1120.f;
+  scalePosition(x5, y5, window);
+  blueDiamond1.setPosition(x5, y5);
+
+  // diamond2
+  Sprite blueDiamond2(blue1);
+  float x6 = 980.f, y6 = 600.f;
+  scalePosition(x6, y6, window);
+  blueDiamond2.setPosition(x6, y6);
+
+  // diamond3
+  Sprite blueDiamond3(blue1);
+  float x7 = 55.f, y7 = 210.f;
+  scalePosition(x7, y7, window);
+  blueDiamond3.setPosition(x7, y7);
+
+  // diamond4
+  Sprite blueDiamond4(blue1);
+  float x8 = 940.f, y8 = 170.f;
+  scalePosition(x8, y8, window);
+  blueDiamond4.setPosition(x8, y8);
+
+  // creating lava
+  RectangleShape lava(Vector2f(118.f, 10.f));
+  lava.setPosition(838.f, 1238.f);
+  scaleRectangles(window.getSize(), lava);
+
+  // creating lake
+  RectangleShape lake(Vector2f(129.f, 10.f));
+  lake.setPosition(1173.f, 1238.f);
+  scaleRectangles(window.getSize(), lake);
+
+  // creating green goo
+  RectangleShape green_goo(Vector2f(105.f, 10.f));
+  green_goo.setPosition(1105.f, 968.f);
+  scaleRectangles(window.getSize(), green_goo);
+
+  // creating two walls
+  // left wall
+  RectangleShape left_wall(Vector2f(10.f, 1800.f));
+  left_wall.setPosition(20.f, 0);
+  left_wall.setFillColor(Color(255, 255, 255));
+
+  // right wall
+  RectangleShape right_wall(Vector2f(10.f, 1800.f));
+  right_wall.setPosition(window.getSize().x - 50, 0);
+  right_wall.setFillColor(Color(255, 255, 255));
+  // Creating grounds for each floor
+  RectangleShape ground[] = {
+      // ground floor
+      RectangleShape(Vector2f(1950.f, 10.f)),
+      // groundright
+      RectangleShape(Vector2f(10.f, 80.f)),
+      RectangleShape(Vector2f(10.f, 35.f)),
+      RectangleShape(Vector2f(40.f, 10.f)),
+      // top
+      RectangleShape(Vector2f(1950.f, 10.f)),
+      // floor1
+      RectangleShape(Vector2f(390.f, 30.f)),
+      // floor2 straight right
+      RectangleShape(Vector2f(500.f, 15.f)),
+      // floor2 inclined *******
+      RectangleShape(Vector2f(10.f, 70.f)),
+      // floor2 straight left
+      RectangleShape(Vector2f(530.f, 15.f)),
+      // floor3 straight right
+      RectangleShape(Vector2f(580.f, 20.f)),
+      // floor3 inclined ******
+      RectangleShape(Vector2f(10.f, 35.f)),
+      // floor3 straight left
+      RectangleShape(Vector2f(460.f, 20.f)),
+      // floor4 straight left
+      RectangleShape(Vector2f(1050.f, 30.f)),
+      // floor4 straight right
+      RectangleShape(Vector2f(240.f, 10.f)),
+      // floor4 middle obstacle straight up
+      RectangleShape(Vector2f(225.f, 10.f)),
+      // floor4 top of square left
+      RectangleShape(Vector2f(155.f, 10.f)),
+      // floor4 width of square left
+      RectangleShape(Vector2f(10.f, 90.f)),
+      // floor4 middle obstacle left
+      RectangleShape(Vector2f(10.f, 50.f)),
+      // floor4 middle obstacle incline *****
+      RectangleShape(Vector2f(10.f, 55.f)),
+      // floor5 middle straight
+      RectangleShape(Vector2f(420.f, 10.f)),
+      // floor5 straight right
+      RectangleShape(Vector2f(250.f, 10.f)),
+      // floor5 middle right incline
+      RectangleShape(Vector2f(10.f, 35.f)),
+      // floor5 middle left incline
+      RectangleShape(Vector2f(10.f, 35.f)),
+      // floor5 middle up straight
+      RectangleShape(Vector2f(80.f, 10.f)),
+      // floor5 left obstacle
+      RectangleShape(Vector2f(10.f, 35.f)),
+      RectangleShape(Vector2f(10.f, 35.f)),
+      RectangleShape(Vector2f(50.f, 10.f)),
+      RectangleShape(Vector2f(70.f, 10.f)),
+      RectangleShape(Vector2f(10.f, 20.f)),
+  };
+
+  // ground editing
+  {
+      // ground floor
+      ground[0].setPosition(0.f, 815.f);
+      // groundright
+      ground[1].setPosition(1090.f, 750.f); // small right wall
+      ground[2].setPosition(1115.f, 730.f);
+      ground[2].setRotation(45);
+      ground[3].setPosition(1125.f, 730.f);
+      // top
+      ground[4].setPosition(0.f, 35.f);
+      // floor1
+      ground[5].setPosition(0.f, 700.f);
+      // floor2 straight right
+      ground[6].setPosition(540.f, 650.f);
+      // floor2 inclined
+      //***
+      ground[7].setPosition(530.f, 595.f);
+      //ground[7].setRotation(-45);
+      // floor2 straight left
+      ground[8].setPosition(-5.f, 585.f);
+      // floor3 straight right
+      ground[9].setPosition(620.f, 470.f);
+      // floor3 inclined
+      //****
+      ground[10].setPosition(610.f, 450.f);
+      //ground[10].setRotation(-45);
+      // floor3 straight left
+      ground[11].setPosition(160.f, 440.f);
+      // floor4 straight left
+      ground[12].setPosition(0.f, 320.f);
+      // floor4 straight right
+      ground[13].setPosition(810.f, 330.f);
+      // floor4 middle obstacle straight up
+      ground[14].setPosition(590.f, 270.f);
+      // floor4 top of square left
+      ground[15].setPosition(0.f, 215.f);
+      // floor4 width of square left
+      ground[16].setPosition(160.f, 225.f); // small  left wall
+      // floor4 middle obstacle left
+      ground[17].setPosition(595.f, 290.f); // small right wall up
+      // floor4 middle obstacle incline 
+      //****
+      ground[18].setPosition(805.f, 280.f);
+      //ground[18].setRotation(-45);
+      // floor5 middle straight
+      ground[19].setPosition(430.f, 185.f);
+      // floor5 straight right
+      ground[20].setPosition(930.f, 185.f);
+      // floor5 middle right incline
+      //****
+      ground[21].setPosition(920.f, 160.f);
+      //ground[21].setRotation(-45);
+      // floor5 middle left incline
+      //*****
+      ground[22].setPosition(845.f, 160.f);
+      //ground[22].setRotation(45);
+      // floor5 middle up straight
+      ground[23].setPosition(850.f, 155.f);
+      // floor5 left obstacle
+      //***
+      ground[24].setPosition(430.f, 170.f);
+      //ground[24].setRotation(-45);
+      //****
+      ground[25].setPosition(365.f, 150.f);
+      //ground[25].setRotation(-45);
+      ground[26].setPosition(380.f, 165.f);
+      ground[27].setPosition(310.f, 135.f);
+      //****
+      ground[28].setPosition(290.f, 135.f);
+      //ground[28].setRotation(45);
+
+  }
+  scaleRectangles(window.getSize(), ground, 29);
+  ground[28].setPosition(-300, 0);
+  // zatoona
+
+  // button1
+  RectangleShape butt1(Vector2f(18, 18));
+  butt1.setPosition(Vector2f(463, 646));
+
+  // button2
+  RectangleShape butt2(Vector2f(18, 18));
+  butt2.setPosition(Vector2f(1311, 477));
+
+  // LEVER 373, 1223
+  Texture lever;
+  lever.loadFromFile("assets/lever.png");
+  RectangleShape lvr(Vector2f(20, 65));
+  lvr.setTexture(&lever);
+  lvr.setPosition(Vector2f(460, 886));
+  lvr.setOrigin(
+      Vector2f(lvr.getLocalBounds().width, lvr.getLocalBounds().height) /
+      1.05f);
+  lvr.setRotation(45);
+
+  ////starting position of the lever////
+  RectangleShape stlvr(Vector2f(5, 40));
+  stlvr.setPosition(Vector2f(479, 867));
+
+  ////end position of the lever////
+  RectangleShape endlvr(Vector2f(5, 40));
+  endlvr.setPosition(Vector2f(417, 867));
+
+  // Elevator1 // the right one with the buttons
+  Texture elvv;
+  elvv.loadFromFile("assets/elev2.png");
+  Sprite elevator1;
+  elevator1.setTexture(elvv);
+  elevator1.setPosition(Vector2f(1500, 553));
+
+  // Elevator1 START fo2
+  RectangleShape STRTelv1(Vector2f(160, 5));
+  STRTelv1.setPosition(1500, 490);
+
+  // Elevator1   END t7t
+  RectangleShape ENDelv1(Vector2f(160, 5));
+  ENDelv1.setPosition(1500, 704);
+
+  // ELEVATOR2 the left one with the lever
+  Texture elv;
+  elv.loadFromFile("assets/elev1.png");
+  Sprite elevator2;
+  elevator2.setTexture(elv);
+  elevator2.setPosition(Vector2f(37, 673));
+
+  // Elevator 2 START FO2
+  RectangleShape STRTelv2(Vector2f(160, 5));
+  STRTelv2.setPosition(37, 673);
+
+  // ELEVATOR2 END t7t
+  RectangleShape ENDelv2(Vector2f(160, 5));
+  ENDelv2.setPosition(37, 840);
+
+  // making and editing fireboy
+  Texture text;
+  text.loadFromFile("assets/fireboysheet.png");
+  Sprite fireboy(text);
+  fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 112));
+  scaleFireboy(fireboy, window.getSize());
+
+  // making and editing watergirl
+  Texture texting;
+  texting.loadFromFile("assets/watergirlsheet.png");
+  Sprite watergirl(texting);
+  watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
+  scaleWatergirl(watergirl, window.getSize());
+
+  // doors
+  // fireboy door
+  Texture bdtexture;
+  bdtexture.loadFromFile("assets/bdoor.png");
+  Sprite bdoor(bdtexture);
+  bdoor.setPosition(sf::Vector2f(1368.0f, 153.0f));
+  bdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
+
+  // watergirl door
+  Texture gdtexture;
+  gdtexture.loadFromFile("assets/gdoor.png");
+  Sprite gdoor(gdtexture);
+  gdoor.setPosition(sf::Vector2f(1500.0f, 153.0f));
+  gdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
+
+  Clock clock;
+
+  // main event
+  Event ev;
+
+  int initialscnds = 0;
+  int initialmnts = 0;
+  // Main Game loop
+  while (window.isOpen()) {
+
+    while (window.pollEvent(ev)) {
+      if (ev.type == Event::Closed) {
+        window.close();
+      }
     }
-    // checking for collision with the left elevator
-    else if (player.getPosition().y + player.getGlobalBounds().height >=
-        elevator2.getPosition().y &&
-        player.getPosition().y + player.getGlobalBounds().height <=
-        elevator2.getPosition().y + elevator2.getGlobalBounds().height &&
-        player.getPosition().x + player.getGlobalBounds().width >
-        elevator2.getPosition().x &&
-        player.getPosition().x <
-        elevator2.getPosition().x + elevator2.getGlobalBounds().width) {
-        return true;
+    if (!menu.isActive && !pausemenu.isActive && !winingmenu.isActive && !losingmenu.isActive) {
+
+      // stopwatch
+      Time gameTime = gameClock.getElapsedTime();
+      int temp = gameTime.asSeconds();
+      if (initialscnds > 0) {
+        gameClock.restart();
+        temp += initialscnds;
+        // std::cout << "temp: " << temp << std::endl;
+        initialscnds = 0;
+      }
+      int minutes = temp / 60;
+      int seconds = temp % 60;
+
+      timeText.setString(std::to_string(minutes) + ":" +
+                         (seconds < 10 ? "0" : "") + std::to_string(seconds));
+
+      // fireboy diamonds
+      {
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond1.getGlobalBounds())) {
+          redDiamond1.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond2.getGlobalBounds())) {
+          redDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond2.getGlobalBounds())) {
+          redDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond3.getGlobalBounds())) {
+          redDiamond3.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond4.getGlobalBounds())) {
+          redDiamond4.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+      }
+
+      // watergirl diamonds
+      {
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond1.getGlobalBounds())) {
+          blueDiamond1.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond2.getGlobalBounds())) {
+          blueDiamond2.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond3.getGlobalBounds())) {
+          blueDiamond3.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+        if (watergirl.getGlobalBounds().intersects(
+                blueDiamond4.getGlobalBounds())) {
+          blueDiamond4.move(9999.f, 0.f);
+          diamond_sound.play();
+        }
+      }
+
+      // fireboy and watergirl death
+      {
+        if ((fireboy.getGlobalBounds().intersects(lake.getGlobalBounds())) ||
+            (fireboy.getGlobalBounds().intersects(
+                green_goo.getGlobalBounds()))) {
+          fireboy.setPosition(Vector2f(-2000, 33330));
+          backgroundMusic.pause();
+          death_sound.play();
+          losingmenu.isActive = true;
+          gameClock.restart();
+          // to hide fireboy and watergirl after dying
+          window.clear();
+          window.draw(backgroundPic);
+          window.draw(lvr);
+          window.draw(elevator1);
+          window.draw(elevator2);
+          window.draw(box);
+          window.draw(redDiamond1);
+          window.draw(redDiamond2);
+          window.draw(redDiamond3);
+          window.draw(redDiamond4);
+          window.draw(blueDiamond1);
+          window.draw(blueDiamond2);
+          window.draw(blueDiamond3);
+          window.draw(blueDiamond4);
+          window.draw(bdoor);
+          window.draw(gdoor);
+          window.draw(fireboy);
+          window.draw(watergirl);
+          window.draw(timeText);
+          drawLosingMenu(window);
+        }
+        if ((watergirl.getGlobalBounds().intersects(lava.getGlobalBounds())) ||
+            (watergirl.getGlobalBounds().intersects(
+                green_goo.getGlobalBounds()))) {
+          watergirl.setPosition(Vector2f(-2000, 33330));
+          backgroundMusic.pause();
+          death_sound.play();
+          losingmenu.isActive = true;
+          gameClock.restart();
+          window.clear();
+          window.draw(backgroundPic);
+          window.draw(lvr);
+          window.draw(elevator1);
+          window.draw(elevator2);
+          window.draw(box);
+          window.draw(redDiamond1);
+          window.draw(redDiamond2);
+          window.draw(redDiamond3);
+          window.draw(redDiamond4);
+          window.draw(blueDiamond1);
+          window.draw(blueDiamond2);
+          window.draw(blueDiamond3);
+          window.draw(blueDiamond4);
+          window.draw(bdoor);
+          window.draw(gdoor);
+          window.draw(fireboy);
+          window.draw(watergirl);
+          window.draw(timeText);
+          drawLosingMenu(window);
+        }
+      }
+
+      // pause
+      if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
+        if (gameTime.asMilliseconds() > 0) {
+          initialscnds = seconds;
+          initialmnts = minutes;
+        }
+        pausemenu.isActive = true;
+        gameClock.restart();
+      }
+
+      // exit when esc is pressed
+      if (Keyboard::isKeyPressed(Keyboard::Key::Q)) {
+        window.clear();
+        menu.isActive = true;
+        drawMenu(window);
+      }
+      
+      // to test wining menu
+      if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
+        winingmenu.isActive = true;
+        drawWinningMenu(window);
+      }
+      
+      // zatoona
+
+      // lever moving right and left
+      {
+        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) ||
+            (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+          if (((fireboy.getGlobalBounds().intersects(
+                   stlvr.getGlobalBounds())) &&
+               (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) ||
+              ((watergirl.getGlobalBounds().intersects(
+                   stlvr.getGlobalBounds())) &&
+               (!lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))))
+
+          {
+            lvr.rotate(-90);
+          }
+        }
+        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) ||
+            (watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+          if (((fireboy.getGlobalBounds().intersects(
+                   endlvr.getGlobalBounds())) &&
+               (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) ||
+              ((watergirl.getGlobalBounds().intersects(
+                   endlvr.getGlobalBounds())) &&
+               (!lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))))
+
+          {
+            lvr.rotate(90);
+          }
+        }
+      }
+
+      // elevator2 moves with the lever
+      {
+        if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) &&
+            ((!elevator2.getGlobalBounds().intersects(
+                ENDelv2.getGlobalBounds())))) {
+          elevator2.move(0, 0.5);
+        }
+        if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) &&
+            ((!elevator2.getGlobalBounds().intersects(
+                STRTelv2.getGlobalBounds())))) {
+          elevator2.move(0, -1);
+          if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
+            fireboy.move(0, -1);
+          }
+          if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
+            watergirl.move(0, -1);
+          }
+        }
+      }
+
+      // elevator1 moves with the buttons
+      {
+        if ((((fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) ||
+              (fireboy.getGlobalBounds().intersects(
+                  butt2.getGlobalBounds()))) ||
+             ((watergirl.getGlobalBounds().intersects(
+                  butt1.getGlobalBounds())) ||
+              (watergirl.getGlobalBounds().intersects(
+                  butt2.getGlobalBounds())))) &&
+            (!elevator1.getGlobalBounds().intersects(
+                ENDelv1.getGlobalBounds()))) {
+          elevator1.move(0, 0.5);
+        }
+        if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) &&
+             (!fireboy.getGlobalBounds().intersects(
+                 butt2.getGlobalBounds()))) &&
+            ((!watergirl.getGlobalBounds().intersects(
+                 butt1.getGlobalBounds())) &&
+             (!watergirl.getGlobalBounds().intersects(
+                 butt2.getGlobalBounds()))) &&
+            (!elevator1.getGlobalBounds().intersects(
+                STRTelv1.getGlobalBounds()))) {
+          elevator1.move(0, -1);
+          if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
+            fireboy.move(0, -1.5);
+          }
+          if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
+            watergirl.move(0, -1.5);
+          }
+        }
+      }
+
+      // sprites not walking through the lever
+      {
+        if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+          if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) &&
+              ((fireboy.getGlobalBounds().intersects(
+                  endlvr.getGlobalBounds())))) {
+            fireboy.move(-5, 0);
+          } else if ((fireboy.getGlobalBounds().intersects(
+                         lvr.getGlobalBounds())) &&
+                     ((fireboy.getGlobalBounds().intersects(
+                         stlvr.getGlobalBounds())))) {
+            fireboy.move(5, 0);
+          }
+        }
+        if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds()))) {
+          if ((watergirl.getGlobalBounds().intersects(lvr.getGlobalBounds())) &&
+              ((watergirl.getGlobalBounds().intersects(
+                  endlvr.getGlobalBounds())))) {
+            watergirl.move(-5, 0);
+          } else if ((watergirl.getGlobalBounds().intersects(
+                         lvr.getGlobalBounds())) &&
+                     ((watergirl.getGlobalBounds().intersects(
+                         stlvr.getGlobalBounds())))) {
+            watergirl.move(5, 0);
+          }
+        }
+      }
+
+      // box
+      {
+        // box gravity
+        if ((!box.getGlobalBounds().intersects(ground[14].getGlobalBounds())) &&
+            (!box.getGlobalBounds().intersects(ground[12].getGlobalBounds()))) {
+          box_Vy += gravity;
+        } else {
+          box_Vy = 0;
+        }
+        box.move(0, box_Vy);
+
+        // box movements with fireboy
+        if (Keyboard::isKeyPressed(Keyboard::Key::Right) &&
+            fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+            !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
+            (fireboy.getPosition().x < box.getPosition().x)) {
+          box.move(0.5, 0);
+        } else if (fireboy.getGlobalBounds().intersects(
+                       box.getGlobalBounds()) &&
+                   !box.getGlobalBounds().intersects(
+                       ground[16].getGlobalBounds()) &&
+                   Keyboard::isKeyPressed(Keyboard::Key::Left) &&
+                   (fireboy.getPosition().x > box.getPosition().x)) {
+          box.move(-0.5, 0);
+        }
+
+        // box movements with watergirl
+        if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
+            watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+            !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
+            (watergirl.getPosition().x < box.getPosition().x)) {
+          box.move(0.5, 0);
+        } else if (watergirl.getGlobalBounds().intersects(
+                       box.getGlobalBounds()) &&
+                   !box.getGlobalBounds().intersects(
+                       ground[16].getGlobalBounds()) &&
+                   Keyboard::isKeyPressed(Keyboard::Key::A) &&
+                   (watergirl.getPosition().x > box.getPosition().x)) {
+          box.move(-0.5, 0);
+        }
+      }
+
+      Fmove(fireboy, right_wall, ground[1], ground[17], ground[22],
+          left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
+          ground[24], ground[25], ground, box, elevator1, elevator2, ev);
+
+      // watergirl moving function
+      Wmove(watergirl, right_wall, ground[1], ground[17], ground[22],
+          left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
+          ground[24], ground[25], ground, box, elevator1, elevator2, ev);
+
+      // doors mechanism
+      {
+        if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds())) {
+
+          if (f < 8) {
+            if (clock.getElapsedTime().asSeconds() >= 0.15) {
+              f++;
+              clock.restart();
+            }
+
+            bdoor.setTextureRect(sf::IntRect(0, f * 173, 110, 130));
+          }
+        }
+        if (watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds())) {
+
+          if (g < 8) {
+            if (clock.getElapsedTime().asSeconds() >= 0.15) {
+              g++;
+              clock.restart();
+            }
+            gdoor.setTextureRect(sf::IntRect(0, g * 158, 110, 130));
+          }
+        }
+      }
+
+      // winnig
+      {
+          if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds()) &&
+              watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds()) &&
+              f == 8 && g == 8) {
+              fireboy.setPosition(-100, 0);
+              watergirl.setPosition(-100, 0);
+              winingmenu.isActive = true;
+              drawWinningMenu(window);
+          }
+      }
+
+    } else {
+      // if paused
+      drawPauseMenu(window);
     }
-    return false;
+
+    window.clear();
+    window.draw(backgroundPic);
+    window.draw(lvr);
+    window.draw(elevator1);
+    window.draw(elevator2);
+    window.draw(box);
+    window.draw(redDiamond1);
+    window.draw(redDiamond2);
+    window.draw(redDiamond3);
+    window.draw(redDiamond4);
+    window.draw(blueDiamond1);
+    window.draw(blueDiamond2);
+    window.draw(blueDiamond3);
+    window.draw(blueDiamond4);
+    window.draw(bdoor);
+    window.draw(gdoor);
+    window.draw(fireboy);
+    window.draw(watergirl);
+    window.draw(timeText);
+    window.display();
+  }
 }
 
+bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
+                           Sprite &elevator2) {
+  // checking for collision with the right elevator
+  if (player.getPosition().y + player.getGlobalBounds().height >=
+          elevator1.getPosition().y &&
+      player.getPosition().y + player.getGlobalBounds().height <=
+          elevator1.getPosition().y + elevator1.getGlobalBounds().height &&
+      player.getPosition().x + player.getGlobalBounds().width >
+          elevator1.getPosition().x &&
+      player.getPosition().x <
+          elevator1.getPosition().x + elevator1.getGlobalBounds().width) {
+    return true;
+  }
+  // checking for collision with the left elevator
+  else if (player.getPosition().y + player.getGlobalBounds().height >=
+               elevator2.getPosition().y &&
+           player.getPosition().y + player.getGlobalBounds().height <=
+               elevator2.getPosition().y + elevator2.getGlobalBounds().height &&
+           player.getPosition().x + player.getGlobalBounds().width >
+               elevator2.getPosition().x &&
+           player.getPosition().x <
+               elevator2.getPosition().x + elevator2.getGlobalBounds().width) {
+    return true;
+  }
+  return false;
+}
 bool doesIntersect(Sprite& player, RectangleShape ground[],
     RectangleShape& box) {
     // checking for collision with the box
@@ -1015,13 +1041,13 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
     Sprite& elevator1, Sprite& elevator2, Event event)
 {
-        if (!(Keyboard::isKeyPressed(Keyboard::Right)) &&
-            !(Keyboard::isKeyPressed(Keyboard::Left))  &&
-            !(Keyboard::isKeyPressed(Keyboard::Up))    &&
-            fireboy_Vy == 0) {
-            fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 105));
-        }
-    
+    if (!(Keyboard::isKeyPressed(Keyboard::Right)) &&
+        !(Keyboard::isKeyPressed(Keyboard::Left)) &&
+        !(Keyboard::isKeyPressed(Keyboard::Up)) &&
+        fireboy_Vy == 0) {
+        fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 105));
+    }
+
     // Check if the top side of the player sprite intersects with the bottom side
     // of the grounds
     for (int i = 0; i < 29; i++) {
@@ -1126,13 +1152,13 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
     Sprite& elevator1, Sprite& elevator2, Event event) {
 
-       if (!(Keyboard::isKeyPressed(Keyboard::W)) &&
-           !(Keyboard::isKeyPressed(Keyboard::A)) &&
-           !(Keyboard::isKeyPressed(Keyboard::D)) &&
-           watergirl_Vy==0){
-           watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
-        }
-    
+    if (!(Keyboard::isKeyPressed(Keyboard::W)) &&
+        !(Keyboard::isKeyPressed(Keyboard::A)) &&
+        !(Keyboard::isKeyPressed(Keyboard::D)) &&
+        watergirl_Vy == 0) {
+        watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
+    }
+
 
     // Check if the top side of the player sprite intersects with the bottom side
     // of the grounds
@@ -1140,7 +1166,7 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
         if (watergirl.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
             !doesIntersect(watergirl, ground, box) &&
             watergirl.getPosition().y > ground[i].getPosition().y &&
-            i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i!=7) {
+            i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
             watergirl.setPosition(watergirl.getPosition().x, ground[i].getPosition().y + ground[i].getGlobalBounds().height);
             watergirl_Vy += gravity;
         }
@@ -1229,234 +1255,341 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
     }
 
 }
-void scaleFireboy(Sprite& sprite, const Vector2u& windowSize) {
-    float xScale = (float)windowSize.x / 1720;
-    float yScale = (float)windowSize.y / 1300;
-    float xPos = 77 * xScale;
-    float yPos = 1140 * yScale;
-    sprite.setScale(0.85f * xScale, 0.85f * yScale);
-    sprite.setPosition(xPos, yPos);
+void scaleFireboy(Sprite &sprite, const Vector2u &windowSize) {
+  float xScale = (float)windowSize.x / 1720;
+  float yScale = (float)windowSize.y / 1300;
+  float xPos = 77 * xScale;
+  float yPos = 1140 * yScale;
+  sprite.setScale(0.85f * xScale, 0.85f * yScale);
+  sprite.setPosition(xPos, yPos);
 }
 
-void scaleWatergirl(Sprite& sprite, const Vector2u& windowSize) {
-    float xScale = (float)windowSize.x / 1720;
-    float yScale = (float)windowSize.y / 1300;
-    float xPos = 78 * xScale;
-    float yPos = 953 * yScale;
-    sprite.setScale(0.85f * xScale, 0.85f * yScale);
-    sprite.setPosition(xPos, yPos);
+void scaleWatergirl(Sprite &sprite, const Vector2u &windowSize) {
+  float xScale = (float)windowSize.x / 1720;
+  float yScale = (float)windowSize.y / 1300;
+  float xPos = 78 * xScale;
+  float yPos = 953 * yScale;
+  sprite.setScale(0.85f * xScale, 0.85f * yScale);
+  sprite.setPosition(xPos, yPos);
 }
 
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
-    int size) {
-    // Calculate the scaling factors for x and y axis
-    float scaleX = (float)windowSize.x / 1210.f;
-    float scaleY = (float)windowSize.y / 850.f;
-    for (int i = 0; i < size; i++) {
-        sf::Vector2f position = ground[i].getPosition();
-        sf::Vector2f size = ground[i].getSize();
-        position.x *= scaleX;
-        position.y *= scaleY;
-        size.x *= scaleX;
-        size.y *= scaleY;
-        ground[i].setPosition(position);
-        ground[i].setSize(size);
-    }
-}
-
-void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape& ground) {
-    // Calculate the scaling factors for x and y axis
-    float scaleX = (float)windowSize.x / 1720.f;
-    float scaleY = (float)windowSize.y / 1300.f;
-    Vector2f position = ground.getPosition();
-    Vector2f size = ground.getSize();
+                     int size) {
+  // Calculate the scaling factors for x and y axis
+  float scaleX = (float)windowSize.x / 1210.f;
+  float scaleY = (float)windowSize.y / 850.f;
+  for (int i = 0; i < size; i++) {
+    sf::Vector2f position = ground[i].getPosition();
+    sf::Vector2f size = ground[i].getSize();
     position.x *= scaleX;
     position.y *= scaleY;
     size.x *= scaleX;
     size.y *= scaleY;
-    ground.setPosition(position);
-    ground.setSize(size);
+    ground[i].setPosition(position);
+    ground[i].setSize(size);
+  }
 }
 
-void scaleBackground(Sprite& backgroundPic, const Vector2u& windowSize) {
-    float scaleX = (float)windowSize.x / 1720.f;
-    float scaleY = (float)windowSize.y / 1300.f;
-    backgroundPic.setScale(scaleX, scaleY * 0.978f);
-    backgroundPic.setPosition(-14.f * scaleX, 10.f * scaleY);
+void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape &ground) {
+  // Calculate the scaling factors for x and y axis
+  float scaleX = (float)windowSize.x / 1720.f;
+  float scaleY = (float)windowSize.y / 1300.f;
+  Vector2f position = ground.getPosition();
+  Vector2f size = ground.getSize();
+  position.x *= scaleX;
+  position.y *= scaleY;
+  size.x *= scaleX;
+  size.y *= scaleY;
+  ground.setPosition(position);
+  ground.setSize(size);
 }
 
-void scalePosition(float& xPos, float& yPos, const sf::RenderWindow& window) {
-    float xScale = window.getSize().x / 1720.f; // calculate x scaling factor
-    float yScale = window.getSize().y / 1300.f; // calculate y scaling factor
-    // scale the diamond position
-    xPos *= xScale;
-    yPos *= yScale;
+void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize) {
+  float scaleX = (float)windowSize.x / 1720.f;
+  float scaleY = (float)windowSize.y / 1300.f;
+  backgroundPic.setScale(scaleX, scaleY * 0.978f);
+  backgroundPic.setPosition(-14.f * scaleX, 10.f * scaleY);
 }
 
-void drawOptoinsMenu(RenderWindow& window) {
-    // making menu options
-    optionsMenu.font.loadFromFile("assets/varsity_regular.ttf");
-    optionsMenu.size = 3;
+void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window) {
+  float xScale = window.getSize().x / 1720.f; // calculate x scaling factor
+  float yScale = window.getSize().y / 1300.f; // calculate y scaling factor
+  // scale the diamond position
+  xPos *= xScale;
+  yPos *= yScale;
+}
 
-    optionsMenu.mainmenu[0].setFont(menu.font);
-    optionsMenu.mainmenu[0].setFillColor(Color{ 204, 153, 0 });
-    optionsMenu.mainmenu[0].setString("Music");
+void drawOptionsMenu(RenderWindow &window) {
+  // making menu options
+  optionsMenu.font.loadFromFile("assets/varsity_regular.ttf");
+  optionsMenu.size = 3;
 
-    optionsMenu.mainmenu[1].setFont(menu.font);
-    optionsMenu.mainmenu[1].setFillColor(Color::White);
-    optionsMenu.mainmenu[1].setString("EFX");
+  optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
+  optionsMenu.mainmenu[0].setString("Music");
 
-    optionsMenu.mainmenu[2].setFont(menu.font);
-    optionsMenu.mainmenu[2].setFillColor(Color::White);
-    optionsMenu.mainmenu[2].setString("Back");
+  optionsMenu.mainmenu[1].setFillColor(Color::White);
+  optionsMenu.mainmenu[1].setString("EFX");
 
-    optionsMenu.setcharsize(90);
-    optionsMenu.setTextPosition(200);
-    optionsMenu.setbackgroud(optionsMenu.background, optionsMenu.bg);
+  optionsMenu.mainmenu[2].setFillColor(Color::White);
+  optionsMenu.mainmenu[2].setString("Back");
 
-    while (optionsMenu.isActive) {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-                break;
-            }
-            else if (event.type == Event::KeyPressed) {
-                if (event.key.code == Keyboard::Up) {
-                    optionsMenu.MoveUp();
-                }
-                if (event.key.code == Keyboard::Down) {
-                    optionsMenu.MoveDown();
-                }
-                if (event.key.code == Keyboard::Escape) {
-                    window.close();
-                }
-            }
-            else if (event.type == Event::KeyReleased) {
-                if (event.key.code == Keyboard::Enter) {
-                    switch (optionsMenu.selected) {
-                    case 0:
-                        // place holder for the music settings function
-                        break;
-                    case 1:
-                        // place holder for the EFX settings function
-                        break;
-                    case 2:
-                        window.clear();
-                        optionsMenu.setSelected(0);
-                        optionsMenu.isActive = false;
-                        menu.isActive = true;
-                        drawMenu(window);
-                        break;
-                    }
-                }
-            }
+  optionsMenu.setTextFont();
+  optionsMenu.setcharsize(90);
+  optionsMenu.setTextPosition(200);
+  optionsMenu.setbackgroud(optionsMenu.background, optionsMenu.bg);
+
+  while (optionsMenu.isActive) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyPressed) {
+        if (event.key.code == Keyboard::Up) {
+          optionsMenu.MoveUp();
         }
+        if (event.key.code == Keyboard::Down) {
+          optionsMenu.MoveDown();
+        }
+        if (event.key.code == Keyboard::Escape) {
+          window.close();
+        }
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Enter) {
+          switch (optionsMenu.selected) {
+          case 0:
+            // place holder for the music settings function
+            break;
+          case 1:
+            // place holder for the EFX settings function
+            break;
+          case 2:
+            window.clear();
+            optionsMenu.setSelected(0);
+            optionsMenu.isActive = false;
+            menu.isActive = true;
+            drawMenu(window);
+            break;
+          }
+        }
+      }
+    }
+    window.clear();
+    window.draw(optionsMenu.bg);
+    optionsMenu.draw(window);
+    window.display();
+  }
+}
+
+struct bottomssprite {
+  Texture txt;
+  Sprite sprite;
+  void setsprites(String str) {
+    txt.loadFromFile(str);
+    sprite.setTexture(txt);
+    sprite.setScale(width / 1210, height / 850);
+  }
+  // if mouse position.y > pausesprite getGlobalBounds.top &&
+  // mouse position.x > pausesprite getGlobalBounds.left &&
+  // mouse position.y < pausesprite getGlobalBounds.top + sprite_width
+  // mouse position.x < pausesprite getGlobalBounds.left + sprite_height
+  bool hover(int xPos, int yPos) {
+    if (xPos > sprite.getGlobalBounds().left &&
+        xPos <
+            (sprite.getGlobalBounds().left + sprite.getGlobalBounds().width) &&
+        yPos > sprite.getGlobalBounds().top &&
+        yPos <
+            (sprite.getGlobalBounds().top + sprite.getGlobalBounds().height)) {
+      return true;
+    }
+    return false;
+  }
+} paustitle, resumebtm, retrybtm, endbtm;
+
+void drawPauseMenu(RenderWindow &window) {
+
+  paustitle.setsprites("assets/pausedlogo.png");
+  resumebtm.setsprites("assets/resumebtm.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  retrybtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  resumebtm.sprite.setPosition(
+      ((width / 2) - resumebtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
+  endbtm.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((650 * (height / 850))));
+
+  pausemenu.setsbackgroud();
+  while (pausemenu.isActive) {
+    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+      pausemenu.isActive = false;
+      window.close();
+      // window.clear();
+    }
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (resumebtm.hover(Mouse::getPosition(window).x,
+                          Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
+      } else if (retrybtm.hover(Mouse::getPosition(window).x,
+                                Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
         window.clear();
-        window.draw(optionsMenu.bg);
-        optionsMenu.draw(window);
-        window.display();
-    }
-}
-
-void drawPauseMenu(RenderWindow& window) {
-    pausemenu.setsbackgroud();
-    while (pausemenu.isActive) {
-        if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-            window.clear();
-            pausemenu.isActive = false;
-        }
-        window.draw(pausemenu.smenu);
-        window.draw(pausemenu.logo);
-        window.display();
-    }
-}
-
-void drawWinningMenu(RenderWindow& window) {
-    winingmenu.setsbackgroud();
-    while (winingmenu.isActive) {
-        if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-            window.clear();
-            winingmenu.isActive = false;
-        }
-        window.draw(winingmenu.smenu);
-        window.draw(winingmenu.logo);
-        window.display();
-    }
-}
-
-void drawLosingMenu(RenderWindow& window, Sprite& sprite) {
-    losingmenu.setsbackgroud();
-    while (losingmenu.isActive) {
-        if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-            window.clear();
-            losingmenu.isActive = false;
-            isrestarted = true;
-        }
-        window.draw(sprite);
-        window.draw(losingmenu.smenu);
-        window.draw(losingmenu.logo);
-        window.display();
-    }
-}
-void drawCreditesMenu(RenderWindow& window) {
-    // making menu credits
-    creditesmenu.font.loadFromFile("assets/varsity_regular.ttf");
-    creditesmenu.size = 7;
-
-    creditesmenu.mainmenu[0].setFont(menu.font);
-    creditesmenu.mainmenu[0].setFillColor(Color::White);
-    creditesmenu.mainmenu[0].setString("OMAR EL-EZABY");
-
-    creditesmenu.mainmenu[1].setFont(menu.font);
-    creditesmenu.mainmenu[1].setFillColor(Color::White);
-    creditesmenu.mainmenu[1].setString("OMAR WATANY");
-
-    creditesmenu.mainmenu[2].setFont(menu.font);
-    creditesmenu.mainmenu[2].setFillColor(Color::White);
-    creditesmenu.mainmenu[2].setString("OMAR EL-HAKIM");
-
-    creditesmenu.mainmenu[3].setFont(menu.font);
-    creditesmenu.mainmenu[3].setFillColor(Color::White);
-    creditesmenu.mainmenu[3].setString("OMAR TEBRY");
-
-    creditesmenu.mainmenu[4].setFont(menu.font);
-    creditesmenu.mainmenu[4].setFillColor(Color::White);
-    creditesmenu.mainmenu[4].setString("OMAR IBRAHIM");
-
-    creditesmenu.mainmenu[5].setFont(menu.font);
-    creditesmenu.mainmenu[5].setFillColor(Color::White);
-    creditesmenu.mainmenu[5].setString("AHMED ALI");
-
-    creditesmenu.mainmenu[6].setFont(menu.font);
-    creditesmenu.mainmenu[6].setFillColor(Color::White);
-    creditesmenu.mainmenu[6].setString("KAREEM ABDEEN");
-
-    creditesmenu.setcharsize(90);
-    creditesmenu.setTextPosition(100);
-    creditesmenu.setbackgroud(creditesmenu.background, creditesmenu.bg);
-
-    while (creditesmenu.isActive) {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-                break;
-            }
-
-
-            else if (event.type == Event::KeyReleased) {
-                if (event.key.code == Keyboard::Escape) {
-                    window.clear();
-                    creditesmenu.isActive = false;
-                    menu.isActive = true;
-                    drawMenu(window);
-                }
-            }
-        }
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
+        menu.isActive = true;
         window.clear();
-        window.draw(creditesmenu.bg);
-        creditesmenu.draw(window);
-        window.display();
+        drawMenu(window);
+      }
     }
+    window.draw(pausemenu.smenu);
+    window.draw(pausemenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(resumebtm.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
+    window.display();
+  }
+}
+
+void drawWinningMenu(RenderWindow &window) {
+  paustitle.setsprites("assets/pausedlogo.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  retrybtm.sprite.setPosition(
+      ((width / 2) - retrybtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
+  winingmenu.setsbackgroud();
+  while (winingmenu.isActive) {
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (retrybtm.hover(Mouse::getPosition(window).x,
+                         Mouse::getPosition(window).y)) {
+        winingmenu.isActive = false;
+        window.clear();
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        winingmenu.isActive = false;
+        menu.isActive = true;
+        window.clear();
+        drawMenu(window);
+      }
+    }
+    window.draw(winingmenu.smenu);
+    window.draw(winingmenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
+    window.display();
+  }
+}
+
+void drawLosingMenu(RenderWindow &window) {
+  paustitle.setsprites("assets/gameover.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  retrybtm.sprite.setPosition(
+      ((width / 2) - retrybtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
+  losingmenu.setsbackgroud();
+  while (losingmenu.isActive) {
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (retrybtm.hover(Mouse::getPosition(window).x,
+                         Mouse::getPosition(window).y)) {
+        losingmenu.isActive = false;
+        window.clear();
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        losingmenu.isActive = false;
+        menu.isActive = true;
+        window.clear();
+        drawMenu(window);
+      }
+    }
+    window.draw(losingmenu.smenu);
+    window.draw(losingmenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
+    window.display();
+  }
+}
+
+void drawCreditesMenu(RenderWindow &window) {
+  // making menu credits
+  creditesmenu.font.loadFromFile("assets/flame.ttf");
+  creditesmenu.size = 7;
+
+  creditesmenu.mainmenu[0].setFillColor(Color::White);
+  creditesmenu.mainmenu[0].setString("OMAR EL-EZABY");
+
+  creditesmenu.mainmenu[1].setFillColor(Color::White);
+  creditesmenu.mainmenu[1].setString("OMAR WATANY");
+
+  creditesmenu.mainmenu[2].setFillColor(Color::White);
+  creditesmenu.mainmenu[2].setString("OMAR EL-HAKIM");
+
+  creditesmenu.mainmenu[3].setFillColor(Color::White);
+  creditesmenu.mainmenu[3].setString("OMAR TEBRY");
+
+  creditesmenu.mainmenu[4].setFillColor(Color::White);
+  creditesmenu.mainmenu[4].setString("OMAR IBRAHIM");
+
+  creditesmenu.mainmenu[5].setFillColor(Color::White);
+  creditesmenu.mainmenu[5].setString("AHMED ALI");
+
+  creditesmenu.mainmenu[6].setFillColor(Color::White);
+  creditesmenu.mainmenu[6].setString("KAREEM ABDEEN");
+
+  creditesmenu.setTextFont();
+  creditesmenu.setcharsize(90);
+  creditesmenu.setTextPosition(100);
+  creditesmenu.setbackgroud(creditesmenu.background, creditesmenu.bg);
+
+  while (creditesmenu.isActive) {
+    Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == Event::Closed) {
+        window.close();
+        break;
+      } else if (event.type == Event::KeyReleased) {
+        if (event.key.code == Keyboard::Escape) {
+          window.clear();
+          creditesmenu.isActive = false;
+          menu.isActive = true;
+          drawMenu(window);
+        }
+      }
+    }
+    window.clear();
+    window.draw(creditesmenu.bg);
+    creditesmenu.draw(window);
+    window.display();
+  }
 }
