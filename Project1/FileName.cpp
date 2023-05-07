@@ -9,8 +9,10 @@
 #include <iostream>
 
 // setting width and height
-// float width = 1210, height = 850;
-float width = 1720, height = 1300;
+float width = 1210, height = 850;
+// float width = 1720, height = 1300;
+
+int ptemp = 0;
 
 using namespace sf;
 float getCenter(Text text) {
@@ -18,6 +20,7 @@ float getCenter(Text text) {
 }
 
 bool backMusicIsActive = false;
+bool EfxIsActive = false;
 
 struct Menu {
   bool isActive = false;
@@ -56,14 +59,30 @@ struct Menu {
       mainmenu[selected].setFillColor(Color{255, 204, 0});
     }
   }
+  bool hover(int xPos, int yPos) {
+    for (int i = 0; i < size; i++) {
+      if (xPos > mainmenu[i].getGlobalBounds().left &&
+          xPos < (mainmenu[i].getGlobalBounds().left +
+                  mainmenu[i].getGlobalBounds().width) &&
+          yPos > mainmenu[i].getGlobalBounds().top &&
+          yPos < (mainmenu[i].getGlobalBounds().top +
+                  mainmenu[i].getGlobalBounds().height)) {
+        mainmenu[selected].setFillColor(Color::White);
+        selected = i;
+        mainmenu[selected].setFillColor(Color{255, 204, 0});
+        return true;
+      }
+    }
+    return false;
+  }
   void setSelected(int n) { selected = n; }
   int pressed() { return selected; }
   void setcharsize(int n) {
     for (int i = 0; i < size; i++) {
-      mainmenu[i].setCharacterSize(n);
+      mainmenu[i].setCharacterSize(1.1 * (n * (height / 1300)));
     }
   }
-  void setTextFont(){
+  void setTextFont() {
     for (int i = 0; i < size; i++) {
       mainmenu[i].setFont(font);
     }
@@ -105,6 +124,31 @@ struct Menu {
   }
 } menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
+struct bottomssprite {
+  Texture txt;
+  Sprite sprite;
+  void setsprites(String str) {
+    txt.loadFromFile(str);
+    sprite.setTexture(txt);
+    sprite.setScale(width / 1210, height / 850);
+  }
+  // if mouse position.y > pausesprite getGlobalBounds.top &&
+  // mouse position.x > pausesprite getGlobalBounds.left &&
+  // mouse position.y < pausesprite getGlobalBounds.top + sprite_width
+  // mouse position.x < pausesprite getGlobalBounds.left + sprite_height
+  bool hover(int xPos, int yPos) {
+    if (xPos > sprite.getGlobalBounds().left &&
+        xPos <
+            (sprite.getGlobalBounds().left + sprite.getGlobalBounds().width) &&
+        yPos > sprite.getGlobalBounds().top &&
+        yPos <
+            (sprite.getGlobalBounds().top + sprite.getGlobalBounds().height)) {
+      return true;
+    }
+    return false;
+  }
+} paustitle, resumebtm, retrybtm, endbtm, okbtm, musicbtm, efxbtm;
+
 // gravity
 // slow computer: gravity =0.13 , moving speed = 3.5 , jumping =-5.5
 // fast computer: gravity = 0.035 moving speed = 0.5 , jumping =-0.9
@@ -116,19 +160,25 @@ int x = 0, y = 0, a = 0, f = 0, g = 0;
 // define some functions
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2);
-bool doesIntersectBox(Sprite& player, RectangleShape& box, RectangleShape ground[]);
-void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
-    RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
-    RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
-    RectangleShape& lWall5, RectangleShape& lWall6, RectangleShape& lWall7,
-    RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
-    Sprite& elevator1, Sprite& elevator2, Event event);
-void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
-    RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
-    RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
-    RectangleShape& lWall5, RectangleShape& lWall6, RectangleShape& lWall7,
-    RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
-    Sprite& elevator1, Sprite& elevator2, Event event); 
+bool doesIntersectBox(Sprite &player, RectangleShape &box,
+                      RectangleShape ground[]);
+bool doesIntersect(Sprite &player, RectangleShape ground[]);
+void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
+           RectangleShape &rWall3, RectangleShape &rWall4,
+           RectangleShape &lWall, RectangleShape &lWall2,
+           RectangleShape &lWall3, RectangleShape &lWall4,
+           RectangleShape &lWall5, RectangleShape &lWall6,
+           RectangleShape &lWall7, RectangleShape &lWall8,
+           RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
+           Sprite &elevator2, Event event);
+void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
+           RectangleShape &rWall3, RectangleShape &rWall4,
+           RectangleShape &lWall, RectangleShape &lWall2,
+           RectangleShape &lWall3, RectangleShape &lWall4,
+           RectangleShape &lWall5, RectangleShape &lWall6,
+           RectangleShape &lWall7, RectangleShape &lWall8,
+           RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
+           Sprite &elevator2, Event event);
 void scaleFireboy(Sprite &sprite, const Vector2u &windowSize);
 void scaleWatergirl(Sprite &sprite, const Vector2u &windowSize);
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
@@ -138,10 +188,11 @@ void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
 void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
 void drawOptionsMenu(RenderWindow &window);
-void drawPauseMenu(RenderWindow &window);
+void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock);
 void drawLosingMenu(RenderWindow &window);
 void drawWinningMenu(RenderWindow &window);
 void drawCreditesMenu(RenderWindow &window);
+void toggle(bool &var);
 void level1(RenderWindow &window);
 
 int main() {
@@ -179,6 +230,9 @@ void drawMenu(RenderWindow &window) {
   menu.setbackgroud(menu.background, menu.bg);
 
   while (menu.isActive && window.isOpen()) {
+
+    menu.hover(Mouse::getPosition(window).x, Mouse::getPosition(window).y);
+
     Event event;
     while (window.pollEvent(event)) {
       if (event.type == Event::Closed) {
@@ -191,36 +245,36 @@ void drawMenu(RenderWindow &window) {
         if (event.key.code == Keyboard::Down) {
           menu.MoveDown();
         }
-      } else if (event.type == Event::KeyReleased) {
-        if (event.key.code == Keyboard::Enter) {
-          switch (menu.selected) {
-          case 0:
-            window.clear();
-            menu.isActive = false;
-            level1(window);
-            break;
-          case 1:
-            window.clear();
-            menu.setSelected(0);
-            optionsMenu.isActive = true;
-            menu.isActive = false;
-            drawOptionsMenu(window);
-            break;
-          case 2:
-            window.clear();
-            menu.setSelected(0);
-            creditesmenu.isActive = true;
-            menu.isActive = false;
-            drawCreditesMenu(window);
-            break;
-          case 3:
-            window.close();
-            break;
-          }
-        } else if (event.key.code == Keyboard::Escape) {
+      } else if ((event.type == Event::KeyReleased) &&
+                     (event.key.code == Keyboard::Enter) ||
+                 ((event.type == Event::MouseButtonReleased) &&
+                  (menu.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)))) {
+        switch (menu.selected) {
+        case 0:
+          window.clear();
+          menu.isActive = false;
+          level1(window);
+          break;
+        case 1:
+          window.clear();
+          menu.setSelected(0);
+          optionsMenu.isActive = true;
+          menu.isActive = false;
+          drawOptionsMenu(window);
+          break;
+        case 2:
+          window.clear();
+          menu.setSelected(0);
+          creditesmenu.isActive = true;
+          menu.isActive = false;
+          drawCreditesMenu(window);
+          break;
+        case 3:
           window.close();
+          break;
         }
-      }
+      } 
     }
     window.clear();
     window.draw(menu.bg);
@@ -417,76 +471,75 @@ void level1(RenderWindow &window) {
 
   // ground editing
   {
-      // ground floor
-      ground[0].setPosition(0.f, 815.f);
-      // groundright
-      ground[1].setPosition(1090.f, 750.f); // small right wall
-      ground[2].setPosition(1115.f, 730.f);
-      ground[2].setRotation(45);
-      ground[3].setPosition(1125.f, 730.f);
-      // top
-      ground[4].setPosition(0.f, 35.f);
-      // floor1
-      ground[5].setPosition(0.f, 700.f);
-      // floor2 straight right
-      ground[6].setPosition(540.f, 650.f);
-      // floor2 inclined
-      //***
-      ground[7].setPosition(530.f, 595.f);
-      //ground[7].setRotation(-45);
-      // floor2 straight left
-      ground[8].setPosition(-5.f, 585.f);
-      // floor3 straight right
-      ground[9].setPosition(620.f, 470.f);
-      // floor3 inclined
-      //****
-      ground[10].setPosition(610.f, 450.f);
-      //ground[10].setRotation(-45);
-      // floor3 straight left
-      ground[11].setPosition(160.f, 440.f);
-      // floor4 straight left
-      ground[12].setPosition(0.f, 320.f);
-      // floor4 straight right
-      ground[13].setPosition(810.f, 330.f);
-      // floor4 middle obstacle straight up
-      ground[14].setPosition(590.f, 270.f);
-      // floor4 top of square left
-      ground[15].setPosition(0.f, 215.f);
-      // floor4 width of square left
-      ground[16].setPosition(160.f, 225.f); // small  left wall
-      // floor4 middle obstacle left
-      ground[17].setPosition(595.f, 290.f); // small right wall up
-      // floor4 middle obstacle incline 
-      //****
-      ground[18].setPosition(805.f, 280.f);
-      //ground[18].setRotation(-45);
-      // floor5 middle straight
-      ground[19].setPosition(430.f, 185.f);
-      // floor5 straight right
-      ground[20].setPosition(930.f, 185.f);
-      // floor5 middle right incline
-      //****
-      ground[21].setPosition(920.f, 160.f);
-      //ground[21].setRotation(-45);
-      // floor5 middle left incline
-      //*****
-      ground[22].setPosition(845.f, 160.f);
-      //ground[22].setRotation(45);
-      // floor5 middle up straight
-      ground[23].setPosition(850.f, 155.f);
-      // floor5 left obstacle
-      //***
-      ground[24].setPosition(430.f, 170.f);
-      //ground[24].setRotation(-45);
-      //****
-      ground[25].setPosition(365.f, 150.f);
-      //ground[25].setRotation(-45);
-      ground[26].setPosition(380.f, 165.f);
-      ground[27].setPosition(310.f, 135.f);
-      //****
-      ground[28].setPosition(290.f, 135.f);
-      //ground[28].setRotation(45);
-
+    // ground floor
+    ground[0].setPosition(0.f, 815.f);
+    // groundright
+    ground[1].setPosition(1090.f, 750.f); // small right wall
+    ground[2].setPosition(1115.f, 730.f);
+    ground[2].setRotation(45);
+    ground[3].setPosition(1125.f, 730.f);
+    // top
+    ground[4].setPosition(0.f, 35.f);
+    // floor1
+    ground[5].setPosition(0.f, 700.f);
+    // floor2 straight right
+    ground[6].setPosition(540.f, 650.f);
+    // floor2 inclined
+    //***
+    ground[7].setPosition(530.f, 595.f);
+    // ground[7].setRotation(-45);
+    //  floor2 straight left
+    ground[8].setPosition(-5.f, 585.f);
+    // floor3 straight right
+    ground[9].setPosition(620.f, 470.f);
+    // floor3 inclined
+    //****
+    ground[10].setPosition(610.f, 450.f);
+    // ground[10].setRotation(-45);
+    //  floor3 straight left
+    ground[11].setPosition(160.f, 440.f);
+    // floor4 straight left
+    ground[12].setPosition(0.f, 320.f);
+    // floor4 straight right
+    ground[13].setPosition(810.f, 330.f);
+    // floor4 middle obstacle straight up
+    ground[14].setPosition(590.f, 270.f);
+    // floor4 top of square left
+    ground[15].setPosition(0.f, 215.f);
+    // floor4 width of square left
+    ground[16].setPosition(160.f, 225.f); // small  left wall
+    // floor4 middle obstacle left
+    ground[17].setPosition(595.f, 290.f); // small right wall up
+    // floor4 middle obstacle incline
+    //****
+    ground[18].setPosition(805.f, 280.f);
+    // ground[18].setRotation(-45);
+    //  floor5 middle straight
+    ground[19].setPosition(430.f, 185.f);
+    // floor5 straight right
+    ground[20].setPosition(930.f, 185.f);
+    // floor5 middle right incline
+    //****
+    ground[21].setPosition(920.f, 160.f);
+    // ground[21].setRotation(-45);
+    //  floor5 middle left incline
+    //*****
+    ground[22].setPosition(845.f, 160.f);
+    // ground[22].setRotation(45);
+    //  floor5 middle up straight
+    ground[23].setPosition(850.f, 155.f);
+    // floor5 left obstacle
+    //***
+    ground[24].setPosition(430.f, 170.f);
+    // ground[24].setRotation(-45);
+    //****
+    ground[25].setPosition(365.f, 150.f);
+    // ground[25].setRotation(-45);
+    ground[26].setPosition(380.f, 165.f);
+    ground[27].setPosition(310.f, 135.f);
+    //****
+    ground[28].setPosition(290.f, 135.f);
+    // ground[28].setRotation(45);
   }
   scaleRectangles(window.getSize(), ground, 29);
   ground[28].setPosition(-300, 0);
@@ -562,7 +615,7 @@ void level1(RenderWindow &window) {
   Sprite watergirl(texting);
   watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
   scaleWatergirl(watergirl, window.getSize());
-  
+
   // doors
   // fireboy door
   Texture bdtexture;
@@ -582,9 +635,7 @@ void level1(RenderWindow &window) {
 
   // main event
   Event ev;
-
-  int initialscnds = 0;
-  int initialmnts = 0;
+  int temp = 0;
   // Main Game loop
   while (window.isOpen()) {
 
@@ -593,17 +644,12 @@ void level1(RenderWindow &window) {
         window.close();
       }
     }
-    if (!menu.isActive && !pausemenu.isActive && !winingmenu.isActive && !losingmenu.isActive) {
+    if (!menu.isActive && !pausemenu.isActive && !winingmenu.isActive &&
+        !losingmenu.isActive) {
 
       // stopwatch
       Time gameTime = gameClock.getElapsedTime();
-      int temp = gameTime.asSeconds();
-      if (initialscnds > 0) {
-        gameClock.restart();
-        temp += initialscnds;
-        // std::cout << "temp: " << temp << std::endl;
-        initialscnds = 0;
-      }
+      temp = gameTime.asSeconds() - ptemp;
       int minutes = temp / 60;
       int seconds = temp % 60;
 
@@ -728,27 +774,25 @@ void level1(RenderWindow &window) {
 
       // pause
       if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
-        if (gameTime.asMilliseconds() > 0) {
-          initialscnds = seconds;
-          initialmnts = minutes;
-        }
         pausemenu.isActive = true;
-        gameClock.restart();
       }
 
       // exit when esc is pressed
       if (Keyboard::isKeyPressed(Keyboard::Key::Q)) {
         window.clear();
         menu.isActive = true;
+        if (backMusicIsActive) {
+          backgroundMusic.stop();
+        }
         drawMenu(window);
       }
-      
+
       // to test wining menu
       if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
         winingmenu.isActive = true;
         drawWinningMenu(window);
       }
-      
+
       // zatoona
 
       // lever moving right and left
@@ -877,43 +921,44 @@ void level1(RenderWindow &window) {
             doesIntersect(fireboy, ground) &&
             fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
-            (fireboy.getPosition().x < box.getPosition().x))
-        {
+            (fireboy.getPosition().x < box.getPosition().x)) {
           box.move(0.5, 0);
-        } 
-         else if (fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-                   doesIntersect(fireboy,ground) &&
-                   !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
+        } else if (fireboy.getGlobalBounds().intersects(
+                       box.getGlobalBounds()) &&
+                   doesIntersect(fireboy, ground) &&
+                   !box.getGlobalBounds().intersects(
+                       ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::Left) &&
-                   (fireboy.getPosition().x > box.getPosition().x)) 
-        {
+                   (fireboy.getPosition().x > box.getPosition().x)) {
           box.move(-0.5, 0);
         }
 
         // box movements with watergirl
         if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
-            doesIntersect(watergirl, ground) && 
+            doesIntersect(watergirl, ground) &&
             watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
             (watergirl.getPosition().x < box.getPosition().x)) {
           box.move(0.5, 0);
-        } else if (watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-                  doesIntersect(watergirl,ground)&&
-                  !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
+        } else if (watergirl.getGlobalBounds().intersects(
+                       box.getGlobalBounds()) &&
+                   doesIntersect(watergirl, ground) &&
+                   !box.getGlobalBounds().intersects(
+                       ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::A) &&
                    (watergirl.getPosition().x > box.getPosition().x)) {
           box.move(-0.5, 0);
         }
       }
 
-      Fmove(fireboy, right_wall, ground[1], ground[17], ground[22],
-          left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
-          ground[24], ground[25], ground, box, elevator1, elevator2, ev);
+      Fmove(fireboy, right_wall, ground[1], ground[17], ground[22], left_wall,
+            ground[16], ground[10], ground[7], ground[18], ground[21],
+            ground[24], ground[25], ground, box, elevator1, elevator2, ev);
 
       // watergirl moving function
-      Wmove(watergirl, right_wall, ground[1], ground[17], ground[22],
-          left_wall, ground[16], ground[10], ground[7], ground[18], ground[21],
-          ground[24], ground[25], ground, box, elevator1, elevator2, ev);
+      Wmove(watergirl, right_wall, ground[1], ground[17], ground[22], left_wall,
+            ground[16], ground[10], ground[7], ground[18], ground[21],
+            ground[24], ground[25], ground, box, elevator1, elevator2, ev);
 
       // doors mechanism
       {
@@ -942,19 +987,19 @@ void level1(RenderWindow &window) {
 
       // winnig
       {
-          if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds()) &&
-              watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds()) &&
-              f == 8 && g == 8) {
-              fireboy.setPosition(-100, 0);
-              watergirl.setPosition(-100, 0);
-              winingmenu.isActive = true;
-              drawWinningMenu(window);
-          }
+        if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds()) &&
+            watergirl.getGlobalBounds().intersects(gdoor.getGlobalBounds()) &&
+            f == 8 && g == 8) {
+          fireboy.setPosition(-100, 0);
+          watergirl.setPosition(-100, 0);
+          winingmenu.isActive = true;
+          drawWinningMenu(window);
+        }
       }
 
     } else {
       // if paused
-      drawPauseMenu(window);
+      drawPauseMenu(window, temp, gameClock);
     }
 
     window.clear();
@@ -980,26 +1025,27 @@ void level1(RenderWindow &window) {
   }
 }
 
-bool doesIntersect(Sprite& player, RectangleShape ground[]) {
+bool doesIntersect(Sprite &player, RectangleShape ground[]) {
 
-    for (int i = 0; i < 29; i++) {
-        if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            i != 1 && i != 7 && i != 10 && i != 16 && i != 17 && i != 18 && i != 21 && i != 22 && i != 24 && i != 25 && i != 28) {
-            // Check if the bottom side of the player sprite intersects with the
-            // top side of the ground rectangle
-            if (player.getPosition().y + player.getGlobalBounds().height >=
-                ground[i].getPosition().y &&
-                player.getPosition().y + player.getGlobalBounds().height <=
-                ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
-                player.getPosition().x + player.getGlobalBounds().width >
-                ground[i].getPosition().x &&
-                player.getPosition().x <
-                ground[i].getPosition().x + ground[i].getGlobalBounds().width) {
-                return true;
-            }
-        }
+  for (int i = 0; i < 29; i++) {
+    if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
+        i != 1 && i != 7 && i != 10 && i != 16 && i != 17 && i != 18 &&
+        i != 21 && i != 22 && i != 24 && i != 25 && i != 28) {
+      // Check if the bottom side of the player sprite intersects with the
+      // top side of the ground rectangle
+      if (player.getPosition().y + player.getGlobalBounds().height >=
+              ground[i].getPosition().y &&
+          player.getPosition().y + player.getGlobalBounds().height <=
+              ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
+          player.getPosition().x + player.getGlobalBounds().width >
+              ground[i].getPosition().x &&
+          player.getPosition().x <
+              ground[i].getPosition().x + ground[i].getGlobalBounds().width) {
+        return true;
+      }
     }
-    return false;
+  }
+  return false;
 }
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2) {
@@ -1028,244 +1074,262 @@ bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
   return false;
 }
 
-bool doesIntersectBox(Sprite& player, RectangleShape& box, RectangleShape ground[])
-{
-    // checking for collision with the box
-    if (!doesIntersect(player,ground) &&
-        player.getPosition().y + player.getGlobalBounds().height >=
-        box.getPosition().y &&
-        player.getPosition().y + player.getGlobalBounds().height <=
-        box.getPosition().y + box.getGlobalBounds().height &&
-        player.getPosition().x + player.getGlobalBounds().width >
-        box.getPosition().x &&
-        player.getPosition().x <
-        box.getPosition().x + box.getGlobalBounds().width) {
-        return true;
-    }
-    return false;
+bool doesIntersectBox(Sprite &player, RectangleShape &box,
+                      RectangleShape ground[]) {
+  // checking for collision with the box
+  if (!doesIntersect(player, ground) &&
+      player.getPosition().y + player.getGlobalBounds().height >=
+          box.getPosition().y &&
+      player.getPosition().y + player.getGlobalBounds().height <=
+          box.getPosition().y + box.getGlobalBounds().height &&
+      player.getPosition().x + player.getGlobalBounds().width >
+          box.getPosition().x &&
+      player.getPosition().x <
+          box.getPosition().x + box.getGlobalBounds().width) {
+    return true;
+  }
+  return false;
 }
 
+void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
+           RectangleShape &rWall3, RectangleShape &rWall4,
+           RectangleShape &lWall, RectangleShape &lWall2,
+           RectangleShape &lWall3, RectangleShape &lWall4,
+           RectangleShape &lWall5, RectangleShape &lWall6,
+           RectangleShape &lWall7, RectangleShape &lWall8,
+           RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
+           Sprite &elevator2, Event event) {
+  if (!(Keyboard::isKeyPressed(Keyboard::Right)) &&
+      !(Keyboard::isKeyPressed(Keyboard::Left)) &&
+      !(Keyboard::isKeyPressed(Keyboard::Up)) && fireboy_Vy == 0) {
+    fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 105));
+  }
 
-void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
-    RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
-    RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
-    RectangleShape& lWall5, RectangleShape& lWall6, RectangleShape& lWall7,
-    RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
-    Sprite& elevator1, Sprite& elevator2, Event event)
-{
-    if (!(Keyboard::isKeyPressed(Keyboard::Right)) &&
-        !(Keyboard::isKeyPressed(Keyboard::Left)) &&
-        !(Keyboard::isKeyPressed(Keyboard::Up)) &&
-        fireboy_Vy == 0) {
-        fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 105));
+  // Check if the top side of the player sprite intersects with the bottom side
+  // of the grounds
+  for (int i = 0; i < 29; i++) {
+    if (fireboy.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
+        !doesIntersect(fireboy, ground) &&
+        fireboy.getPosition().y > ground[i].getPosition().y && i != 1 &&
+        i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
+      fireboy.setPosition(fireboy.getPosition().x,
+                          ground[i].getPosition().y +
+                              ground[i].getGlobalBounds().height);
+      fireboy_Vy += gravity;
     }
+  }
 
-    // Check if the top side of the player sprite intersects with the bottom side
-    // of the grounds
-    for (int i = 0; i < 29; i++) {
-        if (fireboy.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            !doesIntersect(fireboy, ground)  &&
-            fireboy.getPosition().y > ground[i].getPosition().y &&
-            i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
-            fireboy.setPosition(fireboy.getPosition().x, ground[i].getPosition().y + ground[i].getGlobalBounds().height);
-            fireboy_Vy += gravity;
-        }
-    }
+  if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds()) &&
+      !doesIntersectElevator(fireboy, elevator1, elevator2) &&
+      fireboy.getPosition().y - elevator1.getGlobalBounds().height >
+          elevator1.getPosition().y) {
+    fireboy.setPosition(fireboy.getPosition().x,
+                        elevator1.getPosition().y +
+                            elevator1.getGlobalBounds().height);
+    fireboy_Vy += gravity;
+  } else if (fireboy.getGlobalBounds().intersects(
+                 elevator2.getGlobalBounds()) &&
+             !doesIntersectElevator(fireboy, elevator1, elevator2) &&
+             fireboy.getPosition().y - elevator2.getGlobalBounds().height >
+                 elevator2.getPosition().y) {
+    fireboy.setPosition(fireboy.getPosition().x,
+                        elevator2.getPosition().y +
+                            elevator2.getGlobalBounds().height);
+    fireboy_Vy += gravity;
+  }
 
-    if (fireboy.getGlobalBounds().intersects(elevator1.getGlobalBounds()) &&
-        !doesIntersectElevator(fireboy, elevator1, elevator2) &&
-        fireboy.getPosition().y - elevator1.getGlobalBounds().height > elevator1.getPosition().y) {
-        fireboy.setPosition(fireboy.getPosition().x, elevator1.getPosition().y + elevator1.getGlobalBounds().height);
-        fireboy_Vy += gravity;
+  // to the right
+  if ((Keyboard::isKeyPressed(Keyboard::Key::Right)) &&
+      (!fireboy.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(rWall4.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(
+          lWall4.getGlobalBounds())) && // intended, not a mistake
+      !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+        box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
+    fireboy.move(0.5f, 0.0f);
+    a++;
+    if (a % 30 == 0) {
+      x++;
     }
-    else if (fireboy.getGlobalBounds().intersects(elevator2.getGlobalBounds()) &&
-        !doesIntersectElevator(fireboy, elevator1, elevator2) &&
-        fireboy.getPosition().y - elevator2.getGlobalBounds().height > elevator2.getPosition().y) {
-        fireboy.setPosition(fireboy.getPosition().x, elevator2.getPosition().y + elevator2.getGlobalBounds().height);
-        fireboy_Vy += gravity;
+    y = 0;
+    x = x % 5;
+    fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 95, 95));
+  }
+  // to the left
+  if (Keyboard::isKeyPressed(Keyboard::Key::Left) &&
+      (!fireboy.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall2.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall3.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall5.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall6.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall7.getGlobalBounds())) &&
+      (!fireboy.getGlobalBounds().intersects(lWall8.getGlobalBounds())) &&
+      !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+        box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
+    fireboy.move(-0.5f, 0.0f);
+    a++;
+    if (a % 30 == 0) {
+      x++;
     }
+    y = 1;
+    x = x % 5;
+    fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
+  }
+  // fireboy jumping
+  if ((!doesIntersect(fireboy, ground)) &&
+      !doesIntersectBox(fireboy, box, ground) &&
+      !doesIntersectElevator(fireboy, elevator1, elevator2)) {
+    fireboy_Vy += gravity;
+  } else {
+    fireboy_Vy = 0;
+  }
+  if ((Keyboard::isKeyPressed(Keyboard::Key::Up)) &&
+      ((doesIntersect(fireboy, ground)) ||
+       doesIntersectBox(fireboy, box, ground) ||
+       doesIntersectElevator(fireboy, elevator1, elevator2))) {
+    fireboy_Vy = -1.f;
+    a++;
+    if (a % 40 == 0)
+      x++;
+    y = 2;
+    x = x % 4;
+    fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
+  }
+  // upwards
+  fireboy.move(0, fireboy_Vy);
 
-    // to the right
-    if ((Keyboard::isKeyPressed(Keyboard::Key::Right)) &&
-        (!fireboy.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(rWall4.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall4.getGlobalBounds())) && //intended, not a mistake
-        !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-            box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
-        fireboy.move(0.5f, 0.0f);
-        a++;
-        if (a % 30 == 0) {
-            x++;
-        }
-        y = 0;
-        x = x % 5;
-        fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 95, 95));
-    }
-    // to the left
-    if (Keyboard::isKeyPressed(Keyboard::Key::Left) &&
-        (!fireboy.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall2.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall3.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall5.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall6.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall7.getGlobalBounds())) &&
-        (!fireboy.getGlobalBounds().intersects(lWall8.getGlobalBounds())) &&
-        !(fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-            box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
-        fireboy.move(-0.5f, 0.0f);
-        a++;
-        if (a % 30 == 0) {
-            x++;
-        }
-        y = 1;
-        x = x % 5;
-        fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
-    }
-    // fireboy jumping
-    if ((!doesIntersect(fireboy, ground)) && !doesIntersectBox(fireboy,box,ground)&&
-        !doesIntersectElevator(fireboy, elevator1, elevator2)) {
-        fireboy_Vy += gravity;
-    }
-    else {
-        fireboy_Vy = 0;
-    }
-    if ((Keyboard::isKeyPressed(Keyboard::Key::Up)) &&
-        ((doesIntersect(fireboy, ground)) || doesIntersectBox(fireboy, box, ground) ||
-            doesIntersectElevator(fireboy, elevator1, elevator2))) {
-        fireboy_Vy = -1.f;
-        a++;
-        if (a % 40 == 0)
-            x++;
-        y = 2;
-        x = x % 4;
-        fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
-    }
-    // upwards
-    fireboy.move(0, fireboy_Vy);
-
-    if ((fireboy_Vy > 0) && !doesIntersect(fireboy, ground)  &&!doesIntersectBox(fireboy, box, ground) && !doesIntersectElevator(fireboy, elevator1,elevator2) && 
-        !Keyboard::isKeyPressed(Keyboard::Right) &&
-        !Keyboard::isKeyPressed(Keyboard::Left)) {
-        x++;
-        y = 3;
-        x = x % 4;
-        fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
-    }
-
+  if ((fireboy_Vy > 0) && !doesIntersect(fireboy, ground) &&
+      !doesIntersectBox(fireboy, box, ground) &&
+      !doesIntersectElevator(fireboy, elevator1, elevator2) &&
+      !Keyboard::isKeyPressed(Keyboard::Right) &&
+      !Keyboard::isKeyPressed(Keyboard::Left)) {
+    x++;
+    y = 3;
+    x = x % 4;
+    fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
+  }
 }
 
-void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
-    RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
-    RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
-    RectangleShape& lWall5, RectangleShape& lWall6, RectangleShape& lWall7,
-    RectangleShape& lWall8, RectangleShape ground[], RectangleShape& box,
-    Sprite& elevator1, Sprite& elevator2, Event event) {
+void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
+           RectangleShape &rWall3, RectangleShape &rWall4,
+           RectangleShape &lWall, RectangleShape &lWall2,
+           RectangleShape &lWall3, RectangleShape &lWall4,
+           RectangleShape &lWall5, RectangleShape &lWall6,
+           RectangleShape &lWall7, RectangleShape &lWall8,
+           RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
+           Sprite &elevator2, Event event) {
 
-    if (!(Keyboard::isKeyPressed(Keyboard::W)) &&
-        !(Keyboard::isKeyPressed(Keyboard::A)) &&
-        !(Keyboard::isKeyPressed(Keyboard::D)) &&
-        watergirl_Vy == 0) {
-        watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
-    }
+  if (!(Keyboard::isKeyPressed(Keyboard::W)) &&
+      !(Keyboard::isKeyPressed(Keyboard::A)) &&
+      !(Keyboard::isKeyPressed(Keyboard::D)) && watergirl_Vy == 0) {
+    watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
+  }
 
+  // Check if the top side of the player sprite intersects with the bottom side
+  // of the grounds
+  for (int i = 0; i < 29; i++) {
+    if (watergirl.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
+        !doesIntersect(watergirl, ground) &&
+        watergirl.getPosition().y > ground[i].getPosition().y && i != 1 &&
+        i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
+      watergirl.setPosition(watergirl.getPosition().x,
+                            ground[i].getPosition().y +
+                                ground[i].getGlobalBounds().height);
+      watergirl_Vy += gravity;
+    }
+  }
+  if (watergirl.getGlobalBounds().intersects(elevator1.getGlobalBounds()) &&
+      !doesIntersectElevator(watergirl, elevator1, elevator2) &&
+      watergirl.getPosition().y - elevator1.getGlobalBounds().height >
+          elevator1.getPosition().y) {
+    watergirl.setPosition(watergirl.getPosition().x,
+                          elevator1.getPosition().y +
+                              elevator1.getGlobalBounds().height);
+    watergirl_Vy += gravity;
+  } else if (watergirl.getGlobalBounds().intersects(
+                 elevator2.getGlobalBounds()) &&
+             !doesIntersectElevator(watergirl, elevator1, elevator2) &&
+             watergirl.getPosition().y - elevator2.getGlobalBounds().height >
+                 elevator2.getPosition().y) {
+    watergirl.setPosition(watergirl.getPosition().x,
+                          elevator2.getPosition().y +
+                              elevator2.getGlobalBounds().height);
+    watergirl_Vy += gravity;
+  }
+  // to the right
+  if ((Keyboard::isKeyPressed(Keyboard::Key::D)) &&
+      (!watergirl.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(rWall4.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
+      !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+        box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
+    watergirl.move(0.5f, 0.0f);
+    a++;
+    if (a % 30 == 0) {
+      x++;
+    }
+    y = 1;
+    x = x % 5;
+    watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
+  }
+  // to the left
+  if ((Keyboard::isKeyPressed(Keyboard::Key::A)) &&
+      (!watergirl.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall2.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall3.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall5.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall6.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall7.getGlobalBounds())) &&
+      (!watergirl.getGlobalBounds().intersects(lWall8.getGlobalBounds())) &&
+      !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+        box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
+    watergirl.move(-0.5f, 0.0f);
+    a++;
+    if (a % 50 == 0) {
+      x++;
+    }
+    y = 0;
+    x = x % 5;
+    watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
+  }
+  // watergirl jumping
+  if ((!doesIntersect(watergirl, ground)) &&
+      !doesIntersectBox(watergirl, box, ground) &&
+      !doesIntersectElevator(watergirl, elevator1, elevator2)) {
+    watergirl_Vy += gravity;
+  } else {
+    watergirl_Vy = 0;
+  }
+  if ((Keyboard::isKeyPressed(Keyboard::Key::W)) &&
+      (doesIntersect(watergirl, ground) ||
+       doesIntersectBox(watergirl, box, ground) ||
+       doesIntersectElevator(watergirl, elevator1, elevator2))) {
+    watergirl_Vy = -1.;
+    a++;
+    if (a % 30 == 0)
+      x++;
+    y = 2;
+    x = x % 4;
+    watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
+  }
+  // to the up
+  watergirl.move(0, watergirl_Vy);
 
-    // Check if the top side of the player sprite intersects with the bottom side
-    // of the grounds
-    for (int i = 0; i < 29; i++) {
-        if (watergirl.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            !doesIntersect(watergirl, ground) &&
-            watergirl.getPosition().y > ground[i].getPosition().y &&
-            i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
-            watergirl.setPosition(watergirl.getPosition().x, ground[i].getPosition().y + ground[i].getGlobalBounds().height);
-            watergirl_Vy += gravity;
-        }
-    }
-    if (watergirl.getGlobalBounds().intersects(elevator1.getGlobalBounds()) &&
-        !doesIntersectElevator(watergirl, elevator1, elevator2) &&
-        watergirl.getPosition().y - elevator1.getGlobalBounds().height > elevator1.getPosition().y) {
-        watergirl.setPosition(watergirl.getPosition().x, elevator1.getPosition().y + elevator1.getGlobalBounds().height);
-        watergirl_Vy += gravity;
-    }
-    else if (watergirl.getGlobalBounds().intersects(elevator2.getGlobalBounds()) &&
-        !doesIntersectElevator(watergirl, elevator1, elevator2) &&
-        watergirl.getPosition().y - elevator2.getGlobalBounds().height > elevator2.getPosition().y) {
-        watergirl.setPosition(watergirl.getPosition().x, elevator2.getPosition().y + elevator2.getGlobalBounds().height);
-        watergirl_Vy += gravity;
-    }
-    // to the right
-    if ((Keyboard::isKeyPressed(Keyboard::Key::D)) &&
-        (!watergirl.getGlobalBounds().intersects(rWall.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(rWall2.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(rWall3.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(rWall4.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
-        !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-            box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
-        watergirl.move(0.5f, 0.0f);
-        a++;
-        if (a % 30 == 0) {
-            x++;
-        }
-        y = 1;
-        x = x % 5;
-        watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
-    }
-    // to the left
-    if ((Keyboard::isKeyPressed(Keyboard::Key::A)) &&
-        (!watergirl.getGlobalBounds().intersects(lWall.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall2.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall3.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall4.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall5.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall6.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall7.getGlobalBounds())) &&
-        (!watergirl.getGlobalBounds().intersects(lWall8.getGlobalBounds())) &&
-        !(watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
-            box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
-        watergirl.move(-0.5f, 0.0f);
-        a++;
-        if (a % 50 == 0) {
-            x++;
-        }
-        y = 0;
-        x = x % 5;
-        watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
-    }
-    // watergirl jumping
-    if ((!doesIntersect(watergirl, ground)) && !doesIntersectBox(watergirl, box, ground) &&
-        !doesIntersectElevator(watergirl, elevator1, elevator2)) {
-        watergirl_Vy += gravity;
-    }
-    else {
-        watergirl_Vy = 0;
-    }
-    if ((Keyboard::isKeyPressed(Keyboard::Key::W)) &&
-        (doesIntersect(watergirl, ground) || doesIntersectBox(watergirl, box, ground) ||
-            doesIntersectElevator(watergirl, elevator1, elevator2))) {
-        watergirl_Vy = -1.;
-        a++;
-        if (a % 30 == 0)
-            x++;
-        y = 2;
-        x = x % 4;
-        watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
-    }
-    // to the up
-    watergirl.move(0, watergirl_Vy);
-
-    if (watergirl_Vy > 0 && !doesIntersect(watergirl, ground) && !doesIntersectBox(watergirl, box, ground) &&
-        !Keyboard::isKeyPressed(Keyboard::D) &&
-        !Keyboard::isKeyPressed(Keyboard::A))
-    {
-        x++;
-        y = 3;
-        x = x % 4;
-        watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
-    }
-
+  if (watergirl_Vy > 0 && !doesIntersect(watergirl, ground) &&
+      !doesIntersectBox(watergirl, box, ground) &&
+      !Keyboard::isKeyPressed(Keyboard::D) &&
+      !Keyboard::isKeyPressed(Keyboard::A)) {
+    x++;
+    y = 3;
+    x = x % 4;
+    watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
+  }
 }
 void scaleFireboy(Sprite &sprite, const Vector2u &windowSize) {
   float xScale = (float)windowSize.x / 1720;
@@ -1332,93 +1396,85 @@ void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window) {
 }
 
 void drawOptionsMenu(RenderWindow &window) {
-  // making menu options
-  optionsMenu.font.loadFromFile("assets/varsity_regular.ttf");
-  optionsMenu.size = 3;
-
-  optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
-  optionsMenu.mainmenu[0].setString("Music");
-
-  optionsMenu.mainmenu[1].setFillColor(Color::White);
-  optionsMenu.mainmenu[1].setString("EFX");
-
-  optionsMenu.mainmenu[2].setFillColor(Color::White);
-  optionsMenu.mainmenu[2].setString("Back");
-
-  optionsMenu.setTextFont();
-  optionsMenu.setcharsize(90);
-  optionsMenu.setTextPosition(200);
   optionsMenu.setbackgroud(optionsMenu.background, optionsMenu.bg);
+  paustitle.setsprites("assets/pausedlogo.png");
+  okbtm.setsprites("assets/okbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  okbtm.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((650 * (height / 850))));
+
+  optionsMenu.setsbackgroud();
 
   while (optionsMenu.isActive) {
-    Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == Event::Closed) {
+    if (backMusicIsActive) {
+      musicbtm.setsprites("assets/musicactv.png");
+      musicbtm.sprite.setPosition((width / 2) + 50, ((498 * (height / 850))));
+    } else {
+      musicbtm.setsprites("assets/musicnactv.png");
+      musicbtm.sprite.setPosition((width / 2) + 50, ((500 * (height / 850))));
+    }
+    if (EfxIsActive) {
+      efxbtm.setsprites("assets/soundactv.png");
+    } else {
+      efxbtm.setsprites("assets/soundnactv.png");
+    }
+
+    efxbtm.sprite.setPosition(
+        ((width / 2) - efxbtm.sprite.getGlobalBounds().width) - 50,
+        ((500 * (height / 850))));
+
+    Event ev;
+    while (window.pollEvent(ev)) {
+      if (ev.type == Event::Closed) {
         window.close();
         break;
-      } else if (event.type == Event::KeyPressed) {
-        if (event.key.code == Keyboard::Up) {
-          optionsMenu.MoveUp();
+      } else if (ev.type == Event::KeyReleased) {
+        if (ev.key.code == Keyboard::Escape) {
+          window.clear();
+          optionsMenu.isActive = false;
+          menu.isActive = true;
+          drawMenu(window);
         }
-        if (event.key.code == Keyboard::Down) {
-          optionsMenu.MoveDown();
-        }
-        if (event.key.code == Keyboard::Escape) {
-          window.close();
-        }
-      } else if (event.type == Event::KeyReleased) {
-        if (event.key.code == Keyboard::Enter) {
-          switch (optionsMenu.selected) {
-          case 0:
-            // place holder for the music settings function
-            break;
-          case 1:
-            // place holder for the EFX settings function
-            break;
-          case 2:
-            window.clear();
-            optionsMenu.setSelected(0);
-            optionsMenu.isActive = false;
-            menu.isActive = true;
-            drawMenu(window);
-            break;
-          }
+      } else if (ev.type == Event::MouseButtonReleased) {
+        if (okbtm.hover(Mouse::getPosition(window).x,
+                        Mouse::getPosition(window).y)) {
+          window.clear();
+          optionsMenu.isActive = false;
+          menu.isActive = true;
+          drawMenu(window);
+        } else if (musicbtm.hover(Mouse::getPosition(window).x,
+                                  Mouse::getPosition(window).y)) {
+          toggle(backMusicIsActive);
+        } else if (efxbtm.hover(Mouse::getPosition(window).x,
+                                Mouse::getPosition(window).y)) {
+          toggle(EfxIsActive);
         }
       }
     }
+
     window.clear();
     window.draw(optionsMenu.bg);
-    optionsMenu.draw(window);
+    window.draw(optionsMenu.smenu);
+    window.draw(optionsMenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(okbtm.sprite);
+    window.draw(musicbtm.sprite);
+    window.draw(efxbtm.sprite);
     window.display();
   }
 }
 
-struct bottomssprite {
-  Texture txt;
-  Sprite sprite;
-  void setsprites(String str) {
-    txt.loadFromFile(str);
-    sprite.setTexture(txt);
-    sprite.setScale(width / 1210, height / 850);
-  }
-  // if mouse position.y > pausesprite getGlobalBounds.top &&
-  // mouse position.x > pausesprite getGlobalBounds.left &&
-  // mouse position.y < pausesprite getGlobalBounds.top + sprite_width
-  // mouse position.x < pausesprite getGlobalBounds.left + sprite_height
-  bool hover(int xPos, int yPos) {
-    if (xPos > sprite.getGlobalBounds().left &&
-        xPos <
-            (sprite.getGlobalBounds().left + sprite.getGlobalBounds().width) &&
-        yPos > sprite.getGlobalBounds().top &&
-        yPos <
-            (sprite.getGlobalBounds().top + sprite.getGlobalBounds().height)) {
-      return true;
-    }
-    return false;
-  }
-} paustitle, resumebtm, retrybtm, endbtm;
+void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock) {
 
-void drawPauseMenu(RenderWindow &window) {
+  Clock pauseclock;
+
+  Time pausetime = pauseclock.getElapsedTime();
+  ptemp = pausetime.asSeconds();
 
   paustitle.setsprites("assets/pausedlogo.png");
   resumebtm.setsprites("assets/resumebtm.png");
@@ -1443,17 +1499,17 @@ void drawPauseMenu(RenderWindow &window) {
   while (pausemenu.isActive) {
     if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
       pausemenu.isActive = false;
-      window.close();
-      // window.clear();
     }
     if (Mouse::isButtonPressed(Mouse::Button::Left)) {
       if (resumebtm.hover(Mouse::getPosition(window).x,
                           Mouse::getPosition(window).y)) {
         pausemenu.isActive = false;
+        temp -= ptemp;
       } else if (retrybtm.hover(Mouse::getPosition(window).x,
                                 Mouse::getPosition(window).y)) {
         pausemenu.isActive = false;
         window.clear();
+        // gameclock.restart();
         level1(window);
       } else if (endbtm.hover(Mouse::getPosition(window).x,
                               Mouse::getPosition(window).y)) {
@@ -1603,5 +1659,13 @@ void drawCreditesMenu(RenderWindow &window) {
     window.draw(creditesmenu.bg);
     creditesmenu.draw(window);
     window.display();
+  }
+}
+
+void toggle(bool &var) {
+  if (var) {
+    var = false;
+  } else {
+    var = true;
   }
 }
