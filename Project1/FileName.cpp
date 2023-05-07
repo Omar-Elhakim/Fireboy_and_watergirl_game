@@ -6,20 +6,18 @@
 // while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <iostream>
 
 // setting width and height
-float width = 1210, height = 850;
-// float width = 1720, height = 1300;
+// float width = 1210, height = 850;
+float width = 1720, height = 1300;
 
 using namespace sf;
 float getCenter(Text text) {
   return (width - text.getGlobalBounds().width) / 2;
 }
 
-bool backMusicIsActive = true;
+bool backMusicIsActive = false;
 
 struct Menu {
   bool isActive = false;
@@ -65,11 +63,18 @@ struct Menu {
       mainmenu[i].setCharacterSize(n);
     }
   }
+  void setTextFont(){
+    for (int i = 0; i < size; i++) {
+      mainmenu[i].setFont(font);
+    }
+  }
 
   void setTextPosition(int n) {
     for (int i = 0; i < size; i++) {
       mainmenu[i].setPosition(Vector2f(
-          getCenter(mainmenu[i]), height / (size) + (n * i) * (height / 850)));
+          getCenter(mainmenu[i]),
+          ((height / 2) - (mainmenu[0].getGlobalBounds().height * size)) +
+              (i * (mainmenu[0].getGlobalBounds().height)) * 2));
     }
   }
   // big menu background
@@ -82,20 +87,21 @@ struct Menu {
                 height / background.getSize().y);
   }
   // small menus background
-  Texture sbackground;
   Texture GameNameForest;
   Sprite logo;
+  Texture sbackground;
   Sprite smenu;
   void setsbackgroud() {
     sbackground.loadFromFile("assets/smallmenuback.png");
     GameNameForest.loadFromFile("assets/GameNameForest.png");
     smenu.setTexture(sbackground);
     logo.setTexture(GameNameForest);
-    smenu.setScale(Vector2f(0.8, 0.8));
+    smenu.setScale(Vector2f(0.8 * (width / 1210), 0.8 * (height / 850)));
     logo.setPosition((width - GameNameForest.getSize().x) / 2,
                      50 * (height / 850));
-    smenu.setPosition((width - (sbackground.getSize().x * 0.8)) / 2,
-                      50 * (height / 850) + GameNameForest.getSize().y);
+    smenu.setPosition((width - (sbackground.getSize().x * smenu.getScale().x)) /
+                          2,
+                      (50 + GameNameForest.getSize().y) * (height / 850));
   }
 } menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
@@ -150,22 +156,19 @@ void drawMenu(RenderWindow &window) {
   menu.font.loadFromFile("assets/varsity_regular.ttf");
   menu.size = 4;
 
-  menu.mainmenu[0].setFont(menu.font);
   menu.mainmenu[0].setFillColor(Color{204, 153, 0});
   menu.mainmenu[0].setString("Play");
 
-  menu.mainmenu[1].setFont(menu.font);
   menu.mainmenu[1].setFillColor(Color::White);
   menu.mainmenu[1].setString("Options");
 
-  menu.mainmenu[2].setFont(menu.font);
   menu.mainmenu[2].setFillColor(Color::White);
   menu.mainmenu[2].setString("Credits");
 
-  menu.mainmenu[3].setFont(menu.font);
   menu.mainmenu[3].setFillColor(Color::White);
   menu.mainmenu[3].setString("Exit");
 
+  menu.setTextFont();
   menu.setcharsize(90);
   menu.setTextPosition(100);
   menu.setbackgroud(menu.background, menu.bg);
@@ -577,7 +580,7 @@ void level1(RenderWindow &window) {
         window.close();
       }
     }
-    if (!pausemenu.isActive && !winingmenu.isActive && !losingmenu.isActive) {
+    if (!menu.isActive && !pausemenu.isActive && !winingmenu.isActive && !losingmenu.isActive) {
 
       // stopwatch
       Time gameTime = gameClock.getElapsedTime();
@@ -585,7 +588,7 @@ void level1(RenderWindow &window) {
       if (initialscnds > 0) {
         gameClock.restart();
         temp += initialscnds;
-        std::cout << "temp: " << temp << std::endl;
+        // std::cout << "temp: " << temp << std::endl;
         initialscnds = 0;
       }
       int minutes = temp / 60;
@@ -657,6 +660,7 @@ void level1(RenderWindow &window) {
           death_sound.play();
           losingmenu.isActive = true;
           gameClock.restart();
+          // to hide fireboy and watergirl after dying
           window.clear();
           window.draw(backgroundPic);
           window.draw(lvr);
@@ -686,7 +690,6 @@ void level1(RenderWindow &window) {
           death_sound.play();
           losingmenu.isActive = true;
           gameClock.restart();
-          // to hide fireboy and watergirl after dying
           window.clear();
           window.draw(backgroundPic);
           window.draw(lvr);
@@ -716,8 +719,6 @@ void level1(RenderWindow &window) {
           initialscnds = seconds;
           initialmnts = minutes;
         }
-        std::cout << "inits: " << initialscnds << std::endl;
-        std::cout << "initm: " << initialmnts << std::endl;
         pausemenu.isActive = true;
         gameClock.restart();
       }
@@ -727,6 +728,11 @@ void level1(RenderWindow &window) {
         window.clear();
         menu.isActive = true;
         drawMenu(window);
+      }
+      // to test wining menu
+      if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
+        winingmenu.isActive = true;
+        drawWinningMenu(window);
       }
 
       // zatoona
@@ -1255,18 +1261,16 @@ void drawOptionsMenu(RenderWindow &window) {
   optionsMenu.font.loadFromFile("assets/varsity_regular.ttf");
   optionsMenu.size = 3;
 
-  optionsMenu.mainmenu[0].setFont(menu.font);
   optionsMenu.mainmenu[0].setFillColor(Color{204, 153, 0});
   optionsMenu.mainmenu[0].setString("Music");
 
-  optionsMenu.mainmenu[1].setFont(menu.font);
   optionsMenu.mainmenu[1].setFillColor(Color::White);
   optionsMenu.mainmenu[1].setString("EFX");
 
-  optionsMenu.mainmenu[2].setFont(menu.font);
   optionsMenu.mainmenu[2].setFillColor(Color::White);
   optionsMenu.mainmenu[2].setString("Back");
 
+  optionsMenu.setTextFont();
   optionsMenu.setcharsize(90);
   optionsMenu.setTextPosition(200);
   optionsMenu.setbackgroud(optionsMenu.background, optionsMenu.bg);
@@ -1314,48 +1318,162 @@ void drawOptionsMenu(RenderWindow &window) {
   }
 }
 
+struct bottomssprite {
+  Texture txt;
+  Sprite sprite;
+  void setsprites(String str) {
+    txt.loadFromFile(str);
+    sprite.setTexture(txt);
+    sprite.setScale(width / 1210, height / 850);
+  }
+  // if mouse position.y > pausesprite getGlobalBounds.top &&
+  // mouse position.x > pausesprite getGlobalBounds.left &&
+  // mouse position.y < pausesprite getGlobalBounds.top + sprite_width
+  // mouse position.x < pausesprite getGlobalBounds.left + sprite_height
+  bool hover(int xPos, int yPos) {
+    if (xPos > sprite.getGlobalBounds().left &&
+        xPos <
+            (sprite.getGlobalBounds().left + sprite.getGlobalBounds().width) &&
+        yPos > sprite.getGlobalBounds().top &&
+        yPos <
+            (sprite.getGlobalBounds().top + sprite.getGlobalBounds().height)) {
+      return true;
+    }
+    return false;
+  }
+} paustitle, resumebtm, retrybtm, endbtm;
+
 void drawPauseMenu(RenderWindow &window) {
+
+  paustitle.setsprites("assets/pausedlogo.png");
+  resumebtm.setsprites("assets/resumebtm.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  retrybtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  resumebtm.sprite.setPosition(
+      ((width / 2) - resumebtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
+  endbtm.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((650 * (height / 850))));
+
   pausemenu.setsbackgroud();
   while (pausemenu.isActive) {
     if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-      window.clear();
       pausemenu.isActive = false;
+      window.close();
+      // window.clear();
+    }
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (resumebtm.hover(Mouse::getPosition(window).x,
+                          Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
+      } else if (retrybtm.hover(Mouse::getPosition(window).x,
+                                Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
+        window.clear();
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        pausemenu.isActive = false;
+        menu.isActive = true;
+        window.clear();
+        drawMenu(window);
+      }
     }
     window.draw(pausemenu.smenu);
     window.draw(pausemenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(resumebtm.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
     window.display();
   }
 }
 
 void drawWinningMenu(RenderWindow &window) {
+  paustitle.setsprites("assets/pausedlogo.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  retrybtm.sprite.setPosition(
+      ((width / 2) - retrybtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
   winingmenu.setsbackgroud();
   while (winingmenu.isActive) {
-    if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-      window.clear();
-      winingmenu.isActive = false;
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (retrybtm.hover(Mouse::getPosition(window).x,
+                         Mouse::getPosition(window).y)) {
+        winingmenu.isActive = false;
+        window.clear();
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        winingmenu.isActive = false;
+        menu.isActive = true;
+        window.clear();
+        drawMenu(window);
+      }
     }
     window.draw(winingmenu.smenu);
     window.draw(winingmenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
     window.display();
   }
 }
 
 void drawLosingMenu(RenderWindow &window) {
+  paustitle.setsprites("assets/gameover.png");
+  retrybtm.setsprites("assets/retrybtm.png");
+  endbtm.setsprites("assets/endbtm.png");
+
+  paustitle.sprite.setPosition(
+      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
+      ((400 * (height / 850))));
+
+  endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+
+  retrybtm.sprite.setPosition(
+      ((width / 2) - retrybtm.sprite.getGlobalBounds().width) - 50,
+      ((550 * (height / 850))));
+
   losingmenu.setsbackgroud();
-  Event ev;
   while (losingmenu.isActive) {
-    while (window.pollEvent(ev)) {
-      if (ev.type == Event::Closed) {
-        window.close();
+    if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+      if (retrybtm.hover(Mouse::getPosition(window).x,
+                         Mouse::getPosition(window).y)) {
+        losingmenu.isActive = false;
+        window.clear();
+        level1(window);
+      } else if (endbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+        losingmenu.isActive = false;
+        menu.isActive = true;
+        window.clear();
+        drawMenu(window);
       }
-    }
-    if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
-      window.clear();
-      losingmenu.isActive = false;
-      level1(window);
     }
     window.draw(losingmenu.smenu);
     window.draw(losingmenu.logo);
+    window.draw(paustitle.sprite);
+    window.draw(retrybtm.sprite);
+    window.draw(endbtm.sprite);
     window.display();
   }
 }
@@ -1365,34 +1483,28 @@ void drawCreditesMenu(RenderWindow &window) {
   creditesmenu.font.loadFromFile("assets/flame.ttf");
   creditesmenu.size = 7;
 
-  creditesmenu.mainmenu[0].setFont(menu.font);
   creditesmenu.mainmenu[0].setFillColor(Color::White);
   creditesmenu.mainmenu[0].setString("OMAR EL-EZABY");
 
-  creditesmenu.mainmenu[1].setFont(menu.font);
   creditesmenu.mainmenu[1].setFillColor(Color::White);
   creditesmenu.mainmenu[1].setString("OMAR WATANY");
 
-  creditesmenu.mainmenu[2].setFont(menu.font);
   creditesmenu.mainmenu[2].setFillColor(Color::White);
   creditesmenu.mainmenu[2].setString("OMAR EL-HAKIM");
 
-  creditesmenu.mainmenu[3].setFont(menu.font);
   creditesmenu.mainmenu[3].setFillColor(Color::White);
   creditesmenu.mainmenu[3].setString("OMAR TEBRY");
 
-  creditesmenu.mainmenu[4].setFont(menu.font);
   creditesmenu.mainmenu[4].setFillColor(Color::White);
   creditesmenu.mainmenu[4].setString("OMAR IBRAHIM");
 
-  creditesmenu.mainmenu[5].setFont(menu.font);
   creditesmenu.mainmenu[5].setFillColor(Color::White);
   creditesmenu.mainmenu[5].setString("AHMED ALI");
 
-  creditesmenu.mainmenu[6].setFont(menu.font);
   creditesmenu.mainmenu[6].setFillColor(Color::White);
   creditesmenu.mainmenu[6].setString("KAREEM ABDEEN");
 
+  creditesmenu.setTextFont();
   creditesmenu.setcharsize(90);
   creditesmenu.setTextPosition(100);
   creditesmenu.setbackgroud(creditesmenu.background, creditesmenu.bg);
