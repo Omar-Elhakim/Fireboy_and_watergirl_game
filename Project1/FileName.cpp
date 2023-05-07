@@ -116,6 +116,7 @@ int x = 0, y = 0, a = 0, f = 0, g = 0;
 // define some functions
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2);
+bool doesIntersectBox(Sprite& player, RectangleShape& box, RectangleShape ground[]);
 void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
     RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
@@ -561,7 +562,7 @@ void level1(RenderWindow &window) {
   Sprite watergirl(texting);
   watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
   scaleWatergirl(watergirl, window.getSize());
-
+  
   // doors
   // fireboy door
   Texture bdtexture;
@@ -873,29 +874,32 @@ void level1(RenderWindow &window) {
 
         // box movements with fireboy
         if (Keyboard::isKeyPressed(Keyboard::Key::Right) &&
+            doesIntersect(fireboy, ground) &&
             fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
-            (fireboy.getPosition().x < box.getPosition().x)) {
+            (fireboy.getPosition().x < box.getPosition().x))
+        {
           box.move(0.5, 0);
-        } else if (fireboy.getGlobalBounds().intersects(
-                       box.getGlobalBounds()) &&
-                   !box.getGlobalBounds().intersects(
-                       ground[16].getGlobalBounds()) &&
+        } 
+         else if (fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                   doesIntersect(fireboy,ground) &&
+                   !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::Left) &&
-                   (fireboy.getPosition().x > box.getPosition().x)) {
+                   (fireboy.getPosition().x > box.getPosition().x)) 
+        {
           box.move(-0.5, 0);
         }
 
         // box movements with watergirl
         if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
+            doesIntersect(watergirl, ground) && 
             watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
             (watergirl.getPosition().x < box.getPosition().x)) {
           box.move(0.5, 0);
-        } else if (watergirl.getGlobalBounds().intersects(
-                       box.getGlobalBounds()) &&
-                   !box.getGlobalBounds().intersects(
-                       ground[16].getGlobalBounds()) &&
+        } else if (watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
+                  doesIntersect(watergirl,ground)&&
+                  !box.getGlobalBounds().intersects(ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::A) &&
                    (watergirl.getPosition().x > box.getPosition().x)) {
           box.move(-0.5, 0);
@@ -976,6 +980,27 @@ void level1(RenderWindow &window) {
   }
 }
 
+bool doesIntersect(Sprite& player, RectangleShape ground[]) {
+
+    for (int i = 0; i < 29; i++) {
+        if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
+            i != 1 && i != 7 && i != 10 && i != 16 && i != 17 && i != 18 && i != 21 && i != 22 && i != 24 && i != 25 && i != 28) {
+            // Check if the bottom side of the player sprite intersects with the
+            // top side of the ground rectangle
+            if (player.getPosition().y + player.getGlobalBounds().height >=
+                ground[i].getPosition().y &&
+                player.getPosition().y + player.getGlobalBounds().height <=
+                ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
+                player.getPosition().x + player.getGlobalBounds().width >
+                ground[i].getPosition().x &&
+                player.getPosition().x <
+                ground[i].getPosition().x + ground[i].getGlobalBounds().width) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2) {
   // checking for collision with the right elevator
@@ -1002,10 +1027,12 @@ bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
   }
   return false;
 }
-bool doesIntersect(Sprite& player, RectangleShape ground[],
-    RectangleShape& box) {
+
+bool doesIntersectBox(Sprite& player, RectangleShape& box, RectangleShape ground[])
+{
     // checking for collision with the box
-    if (player.getPosition().y + player.getGlobalBounds().height >=
+    if (!doesIntersect(player,ground) &&
+        player.getPosition().y + player.getGlobalBounds().height >=
         box.getPosition().y &&
         player.getPosition().y + player.getGlobalBounds().height <=
         box.getPosition().y + box.getGlobalBounds().height &&
@@ -1015,25 +1042,10 @@ bool doesIntersect(Sprite& player, RectangleShape ground[],
         box.getPosition().x + box.getGlobalBounds().width) {
         return true;
     }
-    for (int i = 0; i < 29; i++) {
-        if (player.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            i != 1 && i != 7 && i != 10 && i != 16 && i != 17 && i != 18 && i != 21 && i != 22 && i != 24 && i != 25 && i != 28) {
-            // Check if the bottom side of the player sprite intersects with the
-            // top side of the ground rectangle
-            if (player.getPosition().y + player.getGlobalBounds().height >=
-                ground[i].getPosition().y &&
-                player.getPosition().y + player.getGlobalBounds().height <=
-                ground[i].getPosition().y + ground[i].getGlobalBounds().height &&
-                player.getPosition().x + player.getGlobalBounds().width >
-                ground[i].getPosition().x &&
-                player.getPosition().x <
-                ground[i].getPosition().x + ground[i].getGlobalBounds().width) {
-                return true;
-            }
-        }
-    }
     return false;
 }
+
+
 void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     RectangleShape& rWall3, RectangleShape& rWall4, RectangleShape& lWall,
     RectangleShape& lWall2, RectangleShape& lWall3, RectangleShape& lWall4,
@@ -1052,7 +1064,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     // of the grounds
     for (int i = 0; i < 29; i++) {
         if (fireboy.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            !doesIntersect(fireboy, ground, box) &&
+            !doesIntersect(fireboy, ground)  &&
             fireboy.getPosition().y > ground[i].getPosition().y &&
             i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
             fireboy.setPosition(fireboy.getPosition().x, ground[i].getPosition().y + ground[i].getGlobalBounds().height);
@@ -1113,7 +1125,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
         fireboy.setTextureRect(sf::IntRect(x * 113, y * 95, 100, 95));
     }
     // fireboy jumping
-    if ((!doesIntersect(fireboy, ground, box)) &&
+    if ((!doesIntersect(fireboy, ground)) && !doesIntersectBox(fireboy,box,ground)&&
         !doesIntersectElevator(fireboy, elevator1, elevator2)) {
         fireboy_Vy += gravity;
     }
@@ -1121,7 +1133,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
         fireboy_Vy = 0;
     }
     if ((Keyboard::isKeyPressed(Keyboard::Key::Up)) &&
-        ((doesIntersect(fireboy, ground, box)) ||
+        ((doesIntersect(fireboy, ground)) || doesIntersectBox(fireboy, box, ground) ||
             doesIntersectElevator(fireboy, elevator1, elevator2))) {
         fireboy_Vy = -1.f;
         a++;
@@ -1134,7 +1146,7 @@ void Fmove(Sprite& fireboy, RectangleShape& rWall, RectangleShape& rWall2,
     // upwards
     fireboy.move(0, fireboy_Vy);
 
-    if ((fireboy_Vy > 0) && !doesIntersect(fireboy, ground, box) &&
+    if ((fireboy_Vy > 0) && !doesIntersect(fireboy, ground)  &&!doesIntersectBox(fireboy, box, ground) && !doesIntersectElevator(fireboy, elevator1,elevator2) && 
         !Keyboard::isKeyPressed(Keyboard::Right) &&
         !Keyboard::isKeyPressed(Keyboard::Left)) {
         x++;
@@ -1164,7 +1176,7 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
     // of the grounds
     for (int i = 0; i < 29; i++) {
         if (watergirl.getGlobalBounds().intersects(ground[i].getGlobalBounds()) &&
-            !doesIntersect(watergirl, ground, box) &&
+            !doesIntersect(watergirl, ground) &&
             watergirl.getPosition().y > ground[i].getPosition().y &&
             i != 1 && i != 2 && i != 3 && i != 16 && i != 17 && i != 7) {
             watergirl.setPosition(watergirl.getPosition().x, ground[i].getPosition().y + ground[i].getGlobalBounds().height);
@@ -1223,7 +1235,7 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
         watergirl.setTextureRect(sf::IntRect(x * 175, y * 133, 120, 120));
     }
     // watergirl jumping
-    if ((!doesIntersect(watergirl, ground, box)) &&
+    if ((!doesIntersect(watergirl, ground)) && !doesIntersectBox(watergirl, box, ground) &&
         !doesIntersectElevator(watergirl, elevator1, elevator2)) {
         watergirl_Vy += gravity;
     }
@@ -1231,7 +1243,7 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
         watergirl_Vy = 0;
     }
     if ((Keyboard::isKeyPressed(Keyboard::Key::W)) &&
-        (doesIntersect(watergirl, ground, box) ||
+        (doesIntersect(watergirl, ground) || doesIntersectBox(watergirl, box, ground) ||
             doesIntersectElevator(watergirl, elevator1, elevator2))) {
         watergirl_Vy = -1.;
         a++;
@@ -1244,7 +1256,7 @@ void Wmove(Sprite& watergirl, RectangleShape& rWall, RectangleShape& rWall2,
     // to the up
     watergirl.move(0, watergirl_Vy);
 
-    if (watergirl_Vy > 0 && !doesIntersect(watergirl, ground, box) &&
+    if (watergirl_Vy > 0 && !doesIntersect(watergirl, ground) && !doesIntersectBox(watergirl, box, ground) &&
         !Keyboard::isKeyPressed(Keyboard::D) &&
         !Keyboard::isKeyPressed(Keyboard::A))
     {
