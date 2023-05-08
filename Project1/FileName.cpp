@@ -7,13 +7,15 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Audio/Music.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/System/Time.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <iostream>
+#include <string>
 
 // setting width and height of the window
+// float width = 1210, height = 850;
 float width = 1720 / 2.0, height = 1300 / 2.0;
-
-int ptemp = 0;
 
 using namespace sf;
 float getCenter(Text text) {
@@ -22,6 +24,8 @@ float getCenter(Text text) {
 
 bool backMusicIsActive = true;
 bool EfxIsActive = false;
+
+unsigned int playedtimes = 0;
 
 struct Menu {
   bool isActive = false;
@@ -193,9 +197,9 @@ void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
 void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
 void drawOptionsMenu(RenderWindow &window);
-void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock);
+void drawPauseMenu(RenderWindow &window);
 void drawLosingMenu(RenderWindow &window);
-void drawWinningMenu(RenderWindow &window);
+void drawWinningMenu(RenderWindow &window, Text &gameTime);
 void drawCreditesMenu(RenderWindow &window);
 void toggle(bool &var);
 void level1(RenderWindow &window);
@@ -319,9 +323,6 @@ void level1(RenderWindow &window) {
   Music backgroundMusic;
   backgroundMusic.openFromFile("assets/background-music.wav");
   backgroundMusic.setLoop(true);
-  if (backMusicIsActive) {
-    backgroundMusic.play();
-  }
 
   // button jump sound
   SoundBuffer buttonBuffer;
@@ -726,12 +727,17 @@ void level1(RenderWindow &window) {
 
       // stopwatch
       Time gameTime = gameClock.getElapsedTime();
-      temp = gameTime.asSeconds() - ptemp;
+      temp = gameTime.asSeconds();
       int minutes = temp / 60;
       int seconds = temp % 60;
 
       timeText.setString(std::to_string(minutes) + ":" +
                          (seconds < 10 ? "0" : "") + std::to_string(seconds));
+
+      // playing music
+      if (backMusicIsActive && (backgroundMusic.getStatus() != 2)) {
+        backgroundMusic.play();
+      }
 
       // fireboy diamonds
       {
@@ -895,7 +901,8 @@ void level1(RenderWindow &window) {
       // to test wining menu
       if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
         winingmenu.isActive = true;
-        drawWinningMenu(window);
+        backgroundMusic.stop();
+        drawWinningMenu(window, timeText);
       }
 
       // zatoona
@@ -1124,14 +1131,15 @@ void level1(RenderWindow &window) {
           fireboy.setPosition(-100, 0);
           watergirl.setPosition(-100, 0);
           winingmenu.isActive = true;
-          drawWinningMenu(window);
+          backgroundMusic.stop();
+          drawWinningMenu(window, timeText);
         }
       }
 
     } else {
       // if paused
       backgroundMusic.pause();
-      drawPauseMenu(window, temp, gameClock);
+      drawPauseMenu(window);
     }
     // drawing
     {
@@ -1603,12 +1611,7 @@ void drawOptionsMenu(RenderWindow &window) {
   }
 }
 
-void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock) {
-
-  Clock pauseclock;
-
-  Time pausetime = pauseclock.getElapsedTime();
-  ptemp = pausetime.asSeconds();
+void drawPauseMenu(RenderWindow &window) {
 
   paustitle.setsprites("assets/pausedlogo.png");
   resumebtm.setsprites("assets/resumebtm.png");
@@ -1638,7 +1641,6 @@ void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock) {
       if (resumebtm.hover(Mouse::getPosition(window).x,
                           Mouse::getPosition(window).y)) {
         pausemenu.isActive = false;
-        temp -= ptemp;
       } else if (retrybtm.hover(Mouse::getPosition(window).x,
                                 Mouse::getPosition(window).y)) {
         pausemenu.isActive = false;
@@ -1663,14 +1665,12 @@ void drawPauseMenu(RenderWindow &window, int &temp, Clock &gameclock) {
   }
 }
 
-void drawWinningMenu(RenderWindow &window) {
-  paustitle.setsprites("assets/pausedlogo.png");
+void drawWinningMenu(RenderWindow &window, Text &gameTime) {
+  gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
+  gameTime.setPosition((width - gameTime.getGlobalBounds().width )/ 2, ((400 * (height / 850))));
+
   retrybtm.setsprites("assets/retrybtm.png");
   endbtm.setsprites("assets/endbtm.png");
-
-  paustitle.sprite.setPosition(
-      (width - (paustitle.sprite.getGlobalBounds().width)) / 2,
-      ((400 * (height / 850))));
 
   endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
 
@@ -1699,6 +1699,7 @@ void drawWinningMenu(RenderWindow &window) {
     window.draw(paustitle.sprite);
     window.draw(retrybtm.sprite);
     window.draw(endbtm.sprite);
+    window.draw(gameTime);
     window.display();
   }
 }
