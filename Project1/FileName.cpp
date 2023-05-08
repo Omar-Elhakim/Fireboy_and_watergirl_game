@@ -5,11 +5,13 @@
 // i changed the way the while loop work from while(window.isOpen()) to
 // while (Menu.isActive) so i can close the loop without closing the window.
 #include <SFML/Audio.hpp>
+#include <SFML/Audio/Music.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <iostream>
 
 // setting width and height of the window
- float width = 1720/2.0, height = 1300/2.0;
+float width = 1720 / 2.0, height = 1300 / 2.0;
 
 int ptemp = 0;
 
@@ -18,7 +20,7 @@ float getCenter(Text text) {
   return (width - text.getGlobalBounds().width) / 2;
 }
 
-bool backMusicIsActive = false;
+bool backMusicIsActive = true;
 bool EfxIsActive = false;
 
 struct Menu {
@@ -113,13 +115,15 @@ struct Menu {
     sbackground.loadFromFile("assets/smallmenuback.png");
     GameNameForest.loadFromFile("assets/GameNameForest.png");
     smenu.setTexture(sbackground);
-    logo.setTexture(GameNameForest);
     smenu.setScale(Vector2f(0.8 * (width / 1210), 0.8 * (height / 850)));
-    logo.setPosition((width - GameNameForest.getSize().x) / 2,
-                     50 * (height / 850));
-    smenu.setPosition((width - (sbackground.getSize().x * smenu.getScale().x)) /
-                          2,
-                      (50 + GameNameForest.getSize().y) * (height / 850));
+    smenu.setPosition(
+        ((width - (sbackground.getSize().x * smenu.getScale().x)) / 2),
+        (50 + GameNameForest.getSize().y) * (height / 850));
+    logo.setTexture(GameNameForest);
+    logo.setScale(Vector2f((width / 1210), (height / 850)));
+    logo.setPosition(
+        (width - (GameNameForest.getSize().x) * logo.getScale().x) / 2,
+        50 * (height / 850));
   }
 } menu, optionsMenu, pausemenu, losingmenu, winingmenu, creditesmenu;
 
@@ -146,12 +150,14 @@ struct bottomssprite {
     }
     return false;
   }
-} paustitle, resumebtm, retrybtm, endbtm, okbtm, musicbtm, efxbtm;
+} paustitle, resumebtm, retrybtm, endbtm, okbtm, musicbtm, efxbtm, settingsbtm,
+    backbtm;
 
 // gravity
 // slow computer: gravity =0.13 , moving speed = 3.5 , jumping =-5.5
 // fast computer: gravity = 0.035 moving speed = 0.5 , jumping =-0.9
-float gravity = 0.13/1300*height, fireboy_Vy = 0, watergirl_Vy = 0, box_Vy = 0, vx = 3.5 / 1720 * width, vy = -5.5 / 1300 * height;
+float gravity = 0.13 / 1300 * height, fireboy_Vy = 0, watergirl_Vy = 0,
+      box_Vy = 0, vx = 3.5 / 1720 * width, vy = -5.5 / 1300 * height;
 
 // for animation
 int x = 0, y = 0, a = 0, f = 0, g = 0;
@@ -169,7 +175,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
            RectangleShape &lWall5, RectangleShape &lWall6,
            RectangleShape &lWall7, RectangleShape &lWall8,
            RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
-           Sprite &elevator2, Event event,Sound fbjumpSound);
+           Sprite &elevator2, Event event, Sound fbjumpSound);
 void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
            RectangleShape &rWall3, RectangleShape &rWall4,
            RectangleShape &lWall, RectangleShape &lWall2,
@@ -177,11 +183,12 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
            RectangleShape &lWall5, RectangleShape &lWall6,
            RectangleShape &lWall7, RectangleShape &lWall8,
            RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
-           Sprite &elevator2, Event event , Sound wgjumpSound);
-void scaleSprite(Sprite &sprite,int windowWidth,int windowHeight);
+           Sprite &elevator2, Event event, Sound wgjumpSound);
+void scaleSprite(Sprite &sprite, int windowWidth, int windowHeight);
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
                      int size);
-void scaleRectangles(int windowWidth, int windowHeight, sf::RectangleShape &ground);
+void scaleRectangles(int windowWidth, int windowHeight,
+                     sf::RectangleShape &ground);
 void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
 void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
@@ -205,6 +212,7 @@ int main() {
   return 0;
 }
 
+int menumusicisplaying = 0;
 void drawMenu(RenderWindow &window) {
   // making menu options
   menu.font.loadFromFile("assets/varsity_regular.ttf");
@@ -226,6 +234,14 @@ void drawMenu(RenderWindow &window) {
   menu.setcharsize(90);
   menu.setTextPosition(100);
   menu.setbackgroud(menu.background, menu.bg);
+
+  Music backgroundMusic;
+  backgroundMusic.openFromFile("assets/MenuMusic.wav");
+  backgroundMusic.setLoop(true);
+  if (backMusicIsActive && (menumusicisplaying != 2)) {
+    backgroundMusic.play();
+    menumusicisplaying = backgroundMusic.getStatus();
+  }
 
   while (menu.isActive && window.isOpen()) {
 
@@ -252,6 +268,7 @@ void drawMenu(RenderWindow &window) {
         case 0:
           window.clear();
           menu.isActive = false;
+          backgroundMusic.stop();
           level1(window);
           break;
         case 1:
@@ -259,6 +276,7 @@ void drawMenu(RenderWindow &window) {
           menu.setSelected(0);
           optionsMenu.isActive = true;
           menu.isActive = false;
+          backgroundMusic.stop();
           drawOptionsMenu(window);
           break;
         case 2:
@@ -272,7 +290,7 @@ void drawMenu(RenderWindow &window) {
           window.close();
           break;
         }
-      } 
+      }
     }
     window.clear();
     window.draw(menu.bg);
@@ -305,31 +323,31 @@ void level1(RenderWindow &window) {
     backgroundMusic.play();
   }
 
-  //button jump sound
+  // button jump sound
   SoundBuffer buttonBuffer;
   buttonBuffer.loadFromFile("assets/button.wav");
   Sound buttonSound;
   buttonSound.setBuffer(buttonBuffer);
 
-  //lever jump sound
+  // lever jump sound
   SoundBuffer leverBuffer;
-  leverBuffer.loadFromFile("assets/lever.wav");
+  leverBuffer.loadFromFile("assets/Lever.wav");
   Sound leverSound;
   leverSound.setBuffer(leverBuffer);
 
-  //fb jump sound
+  // fb jump sound
   SoundBuffer fbjumpBuffer;
   fbjumpBuffer.loadFromFile("assets/Jump_fb.wav");
   Sound fbjumpSound;
   fbjumpSound.setBuffer(fbjumpBuffer);
 
-  //wg jump sound
+  // wg jump sound
   SoundBuffer wgjumpBuffer;
   wgjumpBuffer.loadFromFile("assets/Jump_fb.wav");
   Sound wgjumpSound;
   wgjumpSound.setBuffer(wgjumpBuffer);
 
-  //door sound
+  // door sound
   SoundBuffer doorBuffer;
   doorBuffer.loadFromFile("assets/door2.wav");
   Sound doorSound;
@@ -427,7 +445,7 @@ void level1(RenderWindow &window) {
   // creating lava
   RectangleShape lava(Vector2f(118.f, 10.f));
   lava.setPosition(838.f, 1238.f);
-  scaleRectangles(width,height, lava);
+  scaleRectangles(width, height, lava);
 
   // creating lake
   RectangleShape lake(Vector2f(129.f, 10.f));
@@ -444,7 +462,6 @@ void level1(RenderWindow &window) {
   RectangleShape left_wall(Vector2f(10.f, 1800.f));
   left_wall.setPosition(20.f, 0);
   scaleRectangles(width, height, left_wall);
-
 
   // right wall
   RectangleShape right_wall(Vector2f(10.f, 1800.f));
@@ -581,7 +598,6 @@ void level1(RenderWindow &window) {
   }
   scaleRectangles(window.getSize(), ground, 29);
   ground[28].setPosition(-300, 0);
- 
 
   // button1
   RectangleShape butt1(Vector2f(18, 18));
@@ -593,16 +609,17 @@ void level1(RenderWindow &window) {
   butt2.setPosition(Vector2f(1311, 477));
   scaleRectangles(width, height, butt2);
 
-  // LEVER 
+  // LEVER
   Texture lever;
   lever.loadFromFile("assets/lever.png");
   RectangleShape lvr(Vector2f(20, 65));
   lvr.setTexture(&lever);
   lvr.setPosition(Vector2f(460, 886));
-   scaleRectangles(width, height, lvr);
-   lvr.setOrigin(Vector2f(lvr.getLocalBounds().width, lvr.getLocalBounds().height) /1.05f);
+  scaleRectangles(width, height, lvr);
+  lvr.setOrigin(
+      Vector2f(lvr.getLocalBounds().width, lvr.getLocalBounds().height) /
+      1.05f);
   lvr.setRotation(45);
- 
 
   ////starting position of the lever////
   RectangleShape stlvr(Vector2f(5, 40));
@@ -656,7 +673,7 @@ void level1(RenderWindow &window) {
   fireboy.setTextureRect(sf::IntRect(5, 4 * 100, 85, 112));
   fireboy.setPosition(77, 1140);
   fireboy.setScale(0.85, 0.85);
-  scaleSprite(fireboy, width,height);
+  scaleSprite(fireboy, width, height);
 
   // making and editing watergirl
   Texture texting;
@@ -665,8 +682,8 @@ void level1(RenderWindow &window) {
   watergirl.setTextureRect(sf::IntRect(5, 4 * 130, 120, 120));
   watergirl.setPosition(78, 960);
   watergirl.setScale(0.85, 0.85);
-  scaleSprite(watergirl,width,height);
- 
+  scaleSprite(watergirl, width, height);
+
   // doors
   // fireboy door
   Texture bdtexture;
@@ -675,7 +692,7 @@ void level1(RenderWindow &window) {
   bdoor.setPosition(sf::Vector2f(1368.0f, 153.0f));
   bdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
   scaleSprite(bdoor, width, height);
-  
+
   // watergirl door
   Texture gdtexture;
   gdtexture.loadFromFile("assets/gdoor.png");
@@ -684,11 +701,18 @@ void level1(RenderWindow &window) {
   gdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
   scaleSprite(gdoor, width, height);
   bool buttonsoundplayed = true;
-  
+
   Clock clock;
   // main event
   Event ev;
   int temp = 0;
+
+  // settings button
+  settingsbtm.setsprites("assets/settings.png");
+  settingsbtm.sprite.setPosition(
+      (width - (settingsbtm.sprite.getGlobalBounds().width)) / 2,
+      (height - (0.5 * (settingsbtm.sprite.getGlobalBounds().height))));
+
   // Main Game loop
   while (window.isOpen()) {
 
@@ -711,43 +735,39 @@ void level1(RenderWindow &window) {
 
       // fireboy diamonds
       {
-        if (fireboy.getGlobalBounds().intersects(redDiamond1.getGlobalBounds())) {
+        if (fireboy.getGlobalBounds().intersects(
+                redDiamond1.getGlobalBounds())) {
           redDiamond1.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (fireboy.getGlobalBounds().intersects(
                 redDiamond2.getGlobalBounds())) {
           redDiamond2.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (fireboy.getGlobalBounds().intersects(
                 redDiamond2.getGlobalBounds())) {
           redDiamond2.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (fireboy.getGlobalBounds().intersects(
                 redDiamond3.getGlobalBounds())) {
           redDiamond3.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (fireboy.getGlobalBounds().intersects(
                 redDiamond4.getGlobalBounds())) {
           redDiamond4.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
       }
@@ -757,33 +777,29 @@ void level1(RenderWindow &window) {
         if (watergirl.getGlobalBounds().intersects(
                 blueDiamond1.getGlobalBounds())) {
           blueDiamond1.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (watergirl.getGlobalBounds().intersects(
                 blueDiamond2.getGlobalBounds())) {
           blueDiamond2.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (watergirl.getGlobalBounds().intersects(
                 blueDiamond3.getGlobalBounds())) {
           blueDiamond3.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
         if (watergirl.getGlobalBounds().intersects(
                 blueDiamond4.getGlobalBounds())) {
           blueDiamond4.move(9999.f, 0.f);
-          if (EfxIsActive)
-          {
-              diamond_sound.play();
+          if (EfxIsActive) {
+            diamond_sound.play();
           }
         }
       }
@@ -795,8 +811,7 @@ void level1(RenderWindow &window) {
                 green_goo.getGlobalBounds()))) {
           fireboy.setPosition(Vector2f(-2000, 33330));
           backgroundMusic.pause();
-          if (EfxIsActive)
-          {
+          if (EfxIsActive) {
             death_sound.play();
           }
           losingmenu.isActive = true;
@@ -828,9 +843,8 @@ void level1(RenderWindow &window) {
                 green_goo.getGlobalBounds()))) {
           watergirl.setPosition(Vector2f(-2000, 33330));
           backgroundMusic.pause();
-          if (EfxIsActive)
-          {
-              death_sound.play();
+          if (EfxIsActive) {
+            death_sound.play();
           }
           losingmenu.isActive = true;
           gameClock.restart();
@@ -860,6 +874,12 @@ void level1(RenderWindow &window) {
       // pause
       if (Keyboard::isKeyPressed(Keyboard::Key::P)) {
         pausemenu.isActive = true;
+      }
+      if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+        if (settingsbtm.hover(Mouse::getPosition(window).x,
+                              Mouse::getPosition(window).y)) {
+          pausemenu.isActive = true;
+        }
       }
 
       // exit when esc is pressed
@@ -894,8 +914,7 @@ void level1(RenderWindow &window) {
           {
             lvr.rotate(-90);
             if (EfxIsActive)
-                leverSound.play();
-
+              leverSound.play();
           }
         }
         if ((fireboy.getGlobalBounds().intersects(lvr.getGlobalBounds())) ||
@@ -910,8 +929,7 @@ void level1(RenderWindow &window) {
           {
             lvr.rotate(90);
             if (EfxIsActive)
-                leverSound.play();
-
+              leverSound.play();
           }
         }
       }
@@ -921,12 +939,12 @@ void level1(RenderWindow &window) {
         if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) &&
             ((!elevator2.getGlobalBounds().intersects(
                 ENDelv2.getGlobalBounds())))) {
-         elevator2.move(0, 0.5);
+          elevator2.move(0, 0.5);
         }
         if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) &&
             ((!elevator2.getGlobalBounds().intersects(
                 STRTelv2.getGlobalBounds())))) {
-            elevator2.move(0, -1);
+          elevator2.move(0, -1);
           if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
             fireboy.move(0, -1);
           }
@@ -938,9 +956,9 @@ void level1(RenderWindow &window) {
 
       // elevator1 moves with the buttons
       {
-          if (elevator1.getGlobalBounds().intersects(ENDelv1.getGlobalBounds()) ||
-              elevator1.getGlobalBounds().intersects(STRTelv1.getGlobalBounds()))
-              buttonsoundplayed = false;
+        if (elevator1.getGlobalBounds().intersects(ENDelv1.getGlobalBounds()) ||
+            elevator1.getGlobalBounds().intersects(STRTelv1.getGlobalBounds()))
+          buttonsoundplayed = false;
         if ((((fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) ||
               (fireboy.getGlobalBounds().intersects(
                   butt2.getGlobalBounds()))) ||
@@ -950,12 +968,11 @@ void level1(RenderWindow &window) {
                   butt2.getGlobalBounds())))) &&
             (!elevator1.getGlobalBounds().intersects(
                 ENDelv1.getGlobalBounds()))) {
-            if (EfxIsActive && !buttonsoundplayed)
-            {
-                buttonSound.play();
-                buttonsoundplayed = true;
-            }
-            elevator1.move(0, 1);
+          if (EfxIsActive && !buttonsoundplayed) {
+            buttonSound.play();
+            buttonsoundplayed = true;
+          }
+          elevator1.move(0, 1);
         }
         if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) &&
              (!fireboy.getGlobalBounds().intersects(
@@ -966,12 +983,11 @@ void level1(RenderWindow &window) {
                  butt2.getGlobalBounds()))) &&
             (!elevator1.getGlobalBounds().intersects(
                 STRTelv1.getGlobalBounds()))) {
-            if (EfxIsActive && !buttonsoundplayed)
-            {
-                buttonSound.play();
-                buttonsoundplayed = true;
-            }
-            elevator1.move(0, -1.5);
+          if (EfxIsActive && !buttonsoundplayed) {
+            buttonSound.play();
+            buttonsoundplayed = true;
+          }
+          elevator1.move(0, -1.5);
           if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
             fireboy.move(0, -2.5);
           }
@@ -1022,14 +1038,14 @@ void level1(RenderWindow &window) {
 
         // box movements with fireboy
         if (Keyboard::isKeyPressed(Keyboard::Key::Right) &&
-            !doesIntersectBox(fireboy,box, ground) &&
+            !doesIntersectBox(fireboy, box, ground) &&
             fireboy.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
             (fireboy.getPosition().x < box.getPosition().x)) {
           box.move(vx, 0);
         } else if (fireboy.getGlobalBounds().intersects(
                        box.getGlobalBounds()) &&
-                   !doesIntersectBox(fireboy,box, ground) &&
+                   !doesIntersectBox(fireboy, box, ground) &&
                    !box.getGlobalBounds().intersects(
                        ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::Left) &&
@@ -1039,14 +1055,14 @@ void level1(RenderWindow &window) {
 
         // box movements with watergirl
         if (Keyboard::isKeyPressed(Keyboard::Key::D) &&
-            !doesIntersectBox(watergirl,box, ground) &&
+            !doesIntersectBox(watergirl, box, ground) &&
             watergirl.getGlobalBounds().intersects(box.getGlobalBounds()) &&
             !box.getGlobalBounds().intersects(ground[17].getGlobalBounds()) &&
             (watergirl.getPosition().x < box.getPosition().x)) {
           box.move(vx, 0);
         } else if (watergirl.getGlobalBounds().intersects(
                        box.getGlobalBounds()) &&
-                   !doesIntersectBox(watergirl,box, ground) &&
+                   !doesIntersectBox(watergirl, box, ground) &&
                    !box.getGlobalBounds().intersects(
                        ground[16].getGlobalBounds()) &&
                    Keyboard::isKeyPressed(Keyboard::Key::A) &&
@@ -1057,28 +1073,30 @@ void level1(RenderWindow &window) {
 
       Fmove(fireboy, right_wall, ground[1], ground[17], ground[22], left_wall,
             ground[16], ground[10], ground[7], ground[18], ground[21],
-            ground[24], ground[25], ground, box, elevator1, elevator2, ev,fbjumpSound);
+            ground[24], ground[25], ground, box, elevator1, elevator2, ev,
+            fbjumpSound);
       if (fireboy_Vy == vy && EfxIsActive)
-          fbjumpSound.play();
+        fbjumpSound.play();
       // watergirl moving function
       Wmove(watergirl, right_wall, ground[1], ground[17], ground[22], left_wall,
             ground[16], ground[10], ground[7], ground[18], ground[21],
-            ground[24], ground[25], ground, box, elevator1, elevator2, ev,wgjumpSound);
+            ground[24], ground[25], ground, box, elevator1, elevator2, ev,
+            wgjumpSound);
       if (watergirl_Vy == vy && EfxIsActive)
-          wgjumpSound.play();
+        wgjumpSound.play();
       // doors mechanism
       {
         if (fireboy.getGlobalBounds().intersects(bdoor.getGlobalBounds())) {
-            if (f < 8) {
-         
+          if (f < 8) {
+
             if (clock.getElapsedTime().asSeconds() >= 0.15) {
               f++;
-              if (EfxIsActive && f==1)
+              if (EfxIsActive && f == 1)
                 doorSound.play();
-          
-            clock.restart();
+
+              clock.restart();
             }
-            
+
             bdoor.setTextureRect(sf::IntRect(0, f * 173, 110, 130));
           }
         }
@@ -1087,11 +1105,11 @@ void level1(RenderWindow &window) {
             if (clock.getElapsedTime().asSeconds() >= 0.15) {
               g++;
               if (EfxIsActive && g == 1)
-                  doorSound.play();
-              clock.restart();
-            }   
-            if (EfxIsActive)
                 doorSound.play();
+              clock.restart();
+            }
+            if (EfxIsActive)
+              doorSound.play();
 
             gdoor.setTextureRect(sf::IntRect(0, g * 158, 110, 130));
           }
@@ -1115,28 +1133,31 @@ void level1(RenderWindow &window) {
       backgroundMusic.pause();
       drawPauseMenu(window, temp, gameClock);
     }
-    //drawing
+    // drawing
     {
-        window.clear();
-        window.draw(backgroundPic);
-        window.draw(lvr);
-        window.draw(elevator1);
-        window.draw(elevator2);
-        window.draw(box);
-        window.draw(redDiamond1);
-        window.draw(redDiamond2);
-        window.draw(redDiamond3);
-        window.draw(redDiamond4);
-        window.draw(blueDiamond1);
-        window.draw(blueDiamond2);
-        window.draw(blueDiamond3);
-        window.draw(blueDiamond4);
-        window.draw(bdoor);
-        window.draw(gdoor);
-        window.draw(fireboy);
-        window.draw(watergirl);
-        window.draw(timeText);
-        window.display();
+      window.clear();
+      window.draw(backgroundPic);
+      window.draw(lvr);
+      window.draw(elevator1);
+      window.draw(elevator2);
+      window.draw(box);
+      window.draw(redDiamond1);
+      window.draw(redDiamond2);
+      window.draw(redDiamond3);
+      window.draw(redDiamond4);
+      window.draw(blueDiamond1);
+      window.draw(blueDiamond2);
+      window.draw(blueDiamond3);
+      window.draw(blueDiamond4);
+      window.draw(bdoor);
+      window.draw(gdoor);
+      window.draw(fireboy);
+      window.draw(watergirl);
+      window.draw(timeText);
+      if (!pausemenu.isActive) {
+        window.draw(settingsbtm.sprite);
+      }
+      window.display();
     }
   }
 }
@@ -1194,10 +1215,14 @@ bool doesIntersectBox(Sprite &player, RectangleShape &box,
                       RectangleShape ground[]) {
   // checking for collision with the box
   if (!doesIntersect(player, ground) &&
-      player.getPosition().y + player.getGlobalBounds().height >=box.getPosition().y &&
-      player.getPosition().y + player.getGlobalBounds().height <=box.getPosition().y + box.getGlobalBounds().height &&
-      player.getPosition().x + player.getGlobalBounds().width -13 >box.getPosition().x &&
-      player.getPosition().x <box.getPosition().x + box.getGlobalBounds().width-13) {
+      player.getPosition().y + player.getGlobalBounds().height >=
+          box.getPosition().y &&
+      player.getPosition().y + player.getGlobalBounds().height <=
+          box.getPosition().y + box.getGlobalBounds().height &&
+      player.getPosition().x + player.getGlobalBounds().width - 13 >
+          box.getPosition().x &&
+      player.getPosition().x <
+          box.getPosition().x + box.getGlobalBounds().width - 13) {
     return true;
   }
   return false;
@@ -1210,7 +1235,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
            RectangleShape &lWall5, RectangleShape &lWall6,
            RectangleShape &lWall7, RectangleShape &lWall8,
            RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
-           Sprite &elevator2, Event event , Sound fbjumpSound) {
+           Sprite &elevator2, Event event, Sound fbjumpSound) {
   if (!(Keyboard::isKeyPressed(Keyboard::Right)) &&
       !(Keyboard::isKeyPressed(Keyboard::Left)) &&
       !(Keyboard::isKeyPressed(Keyboard::Up)) && fireboy_Vy == 0) {
@@ -1304,7 +1329,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
        doesIntersectElevator(fireboy, elevator1, elevator2))) {
     fireboy_Vy = vy;
     if (EfxIsActive)
-        fbjumpSound.play();
+      fbjumpSound.play();
     a++;
     if (a % 40 == 0)
       x++;
@@ -1334,7 +1359,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
            RectangleShape &lWall5, RectangleShape &lWall6,
            RectangleShape &lWall7, RectangleShape &lWall8,
            RectangleShape ground[], RectangleShape &box, Sprite &elevator1,
-           Sprite &elevator2, Event event , Sound wgjumpSound) {
+           Sprite &elevator2, Event event, Sound wgjumpSound) {
 
   if (!(Keyboard::isKeyPressed(Keyboard::W)) &&
       !(Keyboard::isKeyPressed(Keyboard::A)) &&
@@ -1426,7 +1451,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
        doesIntersectElevator(watergirl, elevator1, elevator2))) {
     watergirl_Vy = vy;
     if (EfxIsActive)
-        wgjumpSound.play();
+      wgjumpSound.play();
     a++;
     if (a % 30 == 0)
       x++;
@@ -1448,8 +1473,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
   }
 }
 
-void scaleSprite(Sprite& sprite, int windowWidth, int windowHeight)
-{
+void scaleSprite(Sprite &sprite, int windowWidth, int windowHeight) {
   float xScale = (float)windowWidth / 1720;
   float yScale = (float)windowHeight / 1300;
   float xPos = sprite.getPosition().x * xScale;
@@ -1457,7 +1481,6 @@ void scaleSprite(Sprite& sprite, int windowWidth, int windowHeight)
   sprite.setScale(sprite.getScale().x * xScale, sprite.getScale().y * yScale);
   sprite.setPosition(xPos, yPos);
 }
-
 
 void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
                      int size) {
@@ -1476,7 +1499,8 @@ void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
   }
 }
 
-void scaleRectangles(int windowWidth,int windowHeight, sf::RectangleShape &ground) {
+void scaleRectangles(int windowWidth, int windowHeight,
+                     sf::RectangleShape &ground) {
   // Calculate the scaling factors for x and y axis
   float scaleX = (float)windowWidth / 1720.f;
   float scaleY = (float)windowHeight / 1300.f;
@@ -1750,6 +1774,9 @@ void drawCreditesMenu(RenderWindow &window) {
   creditesmenu.setTextPosition(100);
   creditesmenu.setbackgroud(creditesmenu.background, creditesmenu.bg);
 
+  backbtm.setsprites("assets/backbtm.png");
+  backbtm.sprite.setPosition(50 * (height / 1210), 50 * (height / 850));
+
   while (creditesmenu.isActive) {
     Event event;
     while (window.pollEvent(event)) {
@@ -1764,10 +1791,20 @@ void drawCreditesMenu(RenderWindow &window) {
           drawMenu(window);
         }
       }
+      if (Mouse::isButtonPressed(Mouse::Button::Left)) {
+        if (backbtm.hover(Mouse::getPosition(window).x,
+                          Mouse::getPosition(window).y)) {
+          window.clear();
+          creditesmenu.isActive = false;
+          menu.isActive = true;
+          drawMenu(window);
+        }
+      }
     }
     window.clear();
     window.draw(creditesmenu.bg);
     creditesmenu.draw(window);
+    window.draw(backbtm.sprite);
     window.display();
   }
 }
