@@ -7,6 +7,7 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Audio/Music.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Mouse.hpp>
@@ -23,7 +24,7 @@ float getCenter(Text text) {
 }
 
 bool backMusicIsActive = true;
-bool EfxIsActive = false;
+bool EfxIsActive = true;
 
 unsigned int playedtimes = 0;
 
@@ -199,8 +200,8 @@ void drawMenu(RenderWindow &window);
 void drawOptionsMenu(RenderWindow &window);
 void drawPauseMenu(RenderWindow &window);
 void drawLosingMenu(RenderWindow &window);
-void drawWinningMenu(RenderWindow &window, Text &gameTime);
-void drawCreditesMenu(RenderWindow &window);
+void drawWinningMenu(RenderWindow &window,int time);
+void drawCreditesMenu(RenderWindow &window, Music &menumusic);
 void toggle(bool &var);
 void level1(RenderWindow &window);
 
@@ -273,6 +274,7 @@ void drawMenu(RenderWindow &window) {
           window.clear();
           menu.isActive = false;
           backgroundMusic.stop();
+          menumusicisplaying = backgroundMusic.getStatus();
           level1(window);
           break;
         case 1:
@@ -281,6 +283,7 @@ void drawMenu(RenderWindow &window) {
           optionsMenu.isActive = true;
           menu.isActive = false;
           backgroundMusic.stop();
+          menumusicisplaying = backgroundMusic.getStatus();
           drawOptionsMenu(window);
           break;
         case 2:
@@ -288,7 +291,9 @@ void drawMenu(RenderWindow &window) {
           menu.setSelected(0);
           creditesmenu.isActive = true;
           menu.isActive = false;
-          drawCreditesMenu(window);
+          backgroundMusic.pause();
+          menumusicisplaying = backgroundMusic.getStatus();
+          drawCreditesMenu(window, backgroundMusic);
           break;
         case 3:
           window.close();
@@ -902,7 +907,7 @@ void level1(RenderWindow &window) {
       if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
         winingmenu.isActive = true;
         backgroundMusic.stop();
-        drawWinningMenu(window, timeText);
+        drawWinningMenu(window, temp);
       }
 
       // zatoona
@@ -1132,7 +1137,7 @@ void level1(RenderWindow &window) {
           watergirl.setPosition(-100, 0);
           winingmenu.isActive = true;
           backgroundMusic.stop();
-          drawWinningMenu(window, timeText);
+          drawWinningMenu(window, temp);
         }
       }
 
@@ -1665,18 +1670,50 @@ void drawPauseMenu(RenderWindow &window) {
   }
 }
 
-void drawWinningMenu(RenderWindow &window, Text &gameTime) {
+void drawWinningMenu(RenderWindow &window, int time) {
+  Text cong;
+  Font font;
+  font.loadFromFile("assets/flame.ttf");
+  cong.setFont(font);
+  cong.setFillColor(Color::Red);
+  cong.setString("Congratulations");
+  cong.setCharacterSize(1.1 * (90 * (height / 1300)));
+  cong.setPosition((width - cong.getGlobalBounds().width) / 2,
+                   400 * (height / 850));
+  Font meh;
+  meh.loadFromFile("assets/varsity_regular.ttf");
+
+  Text gameTime;
+  if ( time <= 15){
+    gameTime.setFont(font);
+    gameTime.setFillColor(Color::Black);
+    gameTime.setString("Rank: SSS");
+  } else if (time <= 20) {
+    gameTime.setFont(font);
+    gameTime.setFillColor(Color::Yellow);
+    gameTime.setString("Rank: Good");
+  } else if (time < 30) {
+    gameTime.setFillColor(Color::Green);
+    gameTime.setFont(meh);
+    gameTime.setString("Rank: Yadobk");
+  } else{
+    gameTime.setFont(meh);
+  cong.setCharacterSize(1.1 * (50 * (height / 1300)));
+    gameTime.setString("Rank: play again if you want to be human");
+  }
+
   gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
-  gameTime.setPosition((width - gameTime.getGlobalBounds().width )/ 2, ((400 * (height / 850))));
+  gameTime.setPosition((width - gameTime.getGlobalBounds().width) / 2,
+                       ((500 * (height / 850))));
 
   retrybtm.setsprites("assets/retrybtm.png");
   endbtm.setsprites("assets/endbtm.png");
 
-  endbtm.sprite.setPosition((width / 2) + 50, ((550 * (height / 850))));
+  endbtm.sprite.setPosition((width / 2) + 50, ((600 * (height / 850))));
 
   retrybtm.sprite.setPosition(
       ((width / 2) - retrybtm.sprite.getGlobalBounds().width) - 50,
-      ((550 * (height / 850))));
+      ((600 * (height / 850))));
 
   winingmenu.setsbackgroud();
   while (winingmenu.isActive) {
@@ -1696,10 +1733,10 @@ void drawWinningMenu(RenderWindow &window, Text &gameTime) {
     }
     window.draw(winingmenu.smenu);
     window.draw(winingmenu.logo);
-    window.draw(paustitle.sprite);
     window.draw(retrybtm.sprite);
     window.draw(endbtm.sprite);
     window.draw(gameTime);
+    window.draw(cong);
     window.display();
   }
 }
@@ -1744,7 +1781,12 @@ void drawLosingMenu(RenderWindow &window) {
   }
 }
 
-void drawCreditesMenu(RenderWindow &window) {
+void drawCreditesMenu(RenderWindow &window, Music &menumusic) {
+  // playing music
+  if (backMusicIsActive && (menumusic.getStatus() != 2)) {
+    menumusic.play();
+  }
+
   // making menu credits
   creditesmenu.font.loadFromFile("assets/flame.ttf");
   creditesmenu.size = 7;
@@ -1784,13 +1826,6 @@ void drawCreditesMenu(RenderWindow &window) {
       if (event.type == Event::Closed) {
         window.close();
         break;
-      } else if (event.type == Event::KeyReleased) {
-        if (event.key.code == Keyboard::Escape) {
-          window.clear();
-          creditesmenu.isActive = false;
-          menu.isActive = true;
-          drawMenu(window);
-        }
       }
       if (Mouse::isButtonPressed(Mouse::Button::Left)) {
         if (backbtm.hover(Mouse::getPosition(window).x,
@@ -1798,6 +1833,8 @@ void drawCreditesMenu(RenderWindow &window) {
           window.clear();
           creditesmenu.isActive = false;
           menu.isActive = true;
+          menumusic.stop();
+          menumusicisplaying = menumusic.getStatus();
           drawMenu(window);
         }
       }
