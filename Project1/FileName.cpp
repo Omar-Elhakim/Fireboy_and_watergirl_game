@@ -1,22 +1,9 @@
-// notes :-RenderWindow &window,RectangleShape &menu
-// for increasing performance change Keyboard evnets handling in the menu
-// functions to be like play function
-// cause it's a nested loop unlike the level1 func.
-// i changed the way the while loop work from while(window.isOpen()) to
-// while (Menu.isActive) so i can close the loop without closing the window.
+
 #include <SFML/Audio.hpp>
-#include <SFML/Audio/Music.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/System/Time.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <iostream>
 #include <string>
 
-// setting width and height of the window
-// float width = 1210, height = 850;
-float width = 1720 / 2.0, height = 1300 / 2.0;
+float width = 1720 , height = 1300 ;
 
 using namespace sf;
 float getCenter(Text text) {
@@ -26,12 +13,9 @@ float getCenter(Text text) {
 bool backMusicIsActive = true;
 bool EfxIsActive = true;
 
-unsigned int playedtimes = 0;
 
 struct Menu {
   bool isActive = false;
-  // dynamic text array size but i won't make a dynamic array,
-  // for using in moving functions.
   int size;
   Font font;
   Text mainmenu[7];
@@ -161,13 +145,13 @@ struct bottomssprite {
 // gravity
 // slow computer: gravity =0.13 , moving speed = 3.5 , jumping =-5.5
 // fast computer: gravity = 0.035 moving speed = 0.5 , jumping =-0.9
-float gravity = 0.13 / 1300 * height, fireboy_Vy = 0, watergirl_Vy = 0,
-      box_Vy = 0, vx = 3.5 / 1720 * width, vy = -5.5 / 1300 * height;
+float gravity = 0.2 , fireboy_Vy = 0, watergirl_Vy = 0,
+      box_Vy = 0, vx = 4.5 , vy = -6.5 ;
 
 // for animation
 int x = 0, y = 0, a = 0, f = 0, g = 0;
 
-// define some functions
+// defining some functions
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2);
 bool doesIntersectBox(Sprite &player, RectangleShape &box,
@@ -194,8 +178,6 @@ void scaleRectangles(sf::Vector2u windowSize, sf::RectangleShape ground[],
                      int size);
 void scaleRectangles(int windowWidth, int windowHeight,
                      sf::RectangleShape &ground);
-void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize);
-void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window);
 void drawMenu(RenderWindow &window);
 void drawOptionsMenu(RenderWindow &window);
 void drawPauseMenu(RenderWindow &window);
@@ -309,10 +291,6 @@ void drawMenu(RenderWindow &window) {
 }
 
 void level1(RenderWindow &window) {
-  // Calculate the percentage of the window dimensions to use for scaling the
-  // grounds
-  float scaleX = (float)window.getSize().x / 1210.f;
-  float scaleY = (float)window.getSize().y / 850.f;
 
   // stopwatch
   Clock gameClock;
@@ -376,7 +354,8 @@ void level1(RenderWindow &window) {
   backgroundTexture.loadFromFile("assets/background.png");
   Sprite backgroundPic(backgroundTexture);
   backgroundPic.setScale(1.0f, 0.978f);
-  scaleBackground(backgroundPic, window.getSize());
+  backgroundPic.setPosition(-14.f , 10.f);
+  scaleSprite(backgroundPic, width, height);
 
   // box
   RectangleShape box(Vector2f(60.0f, 60.0f));
@@ -392,30 +371,23 @@ void level1(RenderWindow &window) {
 
   // diamond1
   Sprite redDiamond1(red1);
-  float x1 = 845.f, y1 = 1120.f;
-  scalePosition(x1, y1, window);
-  redDiamond1.setPosition(x1, y1);
-  redDiamond1.setScale(width / 1720, height / 1300);
+  redDiamond1.setPosition(845, 1120);
+  scaleSprite(redDiamond1, width, height);
 
   // diamond 2
   Sprite redDiamond2(red1);
-  float x2 = 270.f, y2 = 550.f;
-  scalePosition(x2, y2, window);
-  redDiamond2.setPosition(x2, y2);
-  redDiamond2.setScale(width / 1720, height / 1300);
+  redDiamond2.setPosition(270,550); 
+  scaleSprite(redDiamond2, width, height);
 
   // diamond 3
   Sprite redDiamond3(red1);
-  float x3 = 400.f, y3 = 80.f;
-  scalePosition(x3, y3, window);
-  redDiamond3.setPosition(x3, y3);
-  redDiamond3.setScale(width / 1720, height / 1300);
+  redDiamond3.setPosition(400, 80);
+  scaleSprite(redDiamond3, width, height);
+
   // diamond 4
   Sprite redDiamond4(red1);
-  float x4 = 760.f, y4 = 160.f;
-  scalePosition(x4, y4, window);
-  redDiamond4.setPosition(x4, y4);
-  redDiamond4.setScale(width / 1720, height / 1300);
+  redDiamond4.setPosition(760, 160);
+  scaleSprite(redDiamond4, width, height);
 
   // crating watergirl  diamonds
   Texture blue1;
@@ -423,30 +395,23 @@ void level1(RenderWindow &window) {
 
   // diamond1
   Sprite blueDiamond1(blue1);
-  float x5 = 1200.f, y5 = 1120.f;
-  scalePosition(x5, y5, window);
-  blueDiamond1.setPosition(x5, y5);
-  blueDiamond1.setScale(width / 1720, height / 1300);
+  blueDiamond1.setPosition(1200, 1120);
+  scaleSprite(blueDiamond1, width, height);
+
   // diamond2
   Sprite blueDiamond2(blue1);
-  float x6 = 980.f, y6 = 600.f;
-  scalePosition(x6, y6, window);
-  blueDiamond2.setPosition(x6, y6);
-  blueDiamond2.setScale(width / 1720, height / 1300);
-
+  blueDiamond2.setPosition(980, 600);
+  scaleSprite(blueDiamond2, width, height);
+  
   // diamond3
   Sprite blueDiamond3(blue1);
-  float x7 = 55.f, y7 = 210.f;
-  scalePosition(x7, y7, window);
-  blueDiamond3.setPosition(x7, y7);
-  blueDiamond3.setScale(width / 1720, height / 1300);
-
+  blueDiamond3.setPosition(55, 210);
+  scaleSprite(blueDiamond3, width, height);
+  
   // diamond4
   Sprite blueDiamond4(blue1);
-  float x8 = 940.f, y8 = 170.f;
-  scalePosition(x8, y8, window);
-  blueDiamond4.setPosition(x8, y8);
-  blueDiamond4.setScale(width / 1720, height / 1300);
+  blueDiamond4.setPosition(940, 170);
+  scaleSprite(blueDiamond4, width, height);
 
   // creating lava
   RectangleShape lava(Vector2f(118.f, 10.f));
@@ -645,12 +610,12 @@ void level1(RenderWindow &window) {
   elevator1.setPosition(Vector2f(1500, 553));
   scaleSprite(elevator1, width, height);
 
-  // Elevator1 START fo2
+  // Elevator1 starting position
   RectangleShape STRTelv1(Vector2f(160, 5));
   STRTelv1.setPosition(1500, 490);
   scaleRectangles(width, height, STRTelv1);
 
-  // Elevator1   END t7t
+  // Elevator1 ending position
   RectangleShape ENDelv1(Vector2f(160, 5));
   ENDelv1.setPosition(1500, 704);
   scaleRectangles(width, height, ENDelv1);
@@ -663,15 +628,16 @@ void level1(RenderWindow &window) {
   elevator2.setPosition(Vector2f(37, 673));
   scaleSprite(elevator2, width, height);
 
-  // Elevator 2 START FO2
+  // Elevator 2 Starting position
   RectangleShape STRTelv2(Vector2f(160, 5));
   STRTelv2.setPosition(37, 673);
   scaleRectangles(width, height, STRTelv2);
 
-  // ELEVATOR2 END t7t
+  // ELEVATOR2 Ending position
   RectangleShape ENDelv2(Vector2f(160, 5));
   ENDelv2.setPosition(37, 840);
   scaleRectangles(width, height, ENDelv2);
+
   // making and editing fireboy
   Texture text;
   text.loadFromFile("assets/fireboysheet.png");
@@ -707,7 +673,6 @@ void level1(RenderWindow &window) {
   gdoor.setTextureRect(sf::IntRect(0, 0, 110, 130));
   scaleSprite(gdoor, width, height);
   bool buttonsoundplayed = true;
-
   Clock clock;
   // main event
   Event ev;
@@ -893,24 +858,6 @@ void level1(RenderWindow &window) {
         }
       }
 
-      // exit when esc is pressed
-      if (Keyboard::isKeyPressed(Keyboard::Key::Q)) {
-        window.clear();
-        menu.isActive = true;
-        if (backMusicIsActive) {
-          backgroundMusic.stop();
-        }
-        drawMenu(window);
-      }
-
-      // to test wining menu
-      if (Keyboard::isKeyPressed(Keyboard::Key::Y)) {
-        winingmenu.isActive = true;
-        backgroundMusic.stop();
-        drawWinningMenu(window, temp);
-      }
-
-      // zatoona
 
       // lever moving right and left
       {
@@ -951,17 +898,17 @@ void level1(RenderWindow &window) {
         if (((lvr.getGlobalBounds().intersects(endlvr.getGlobalBounds()))) &&
             ((!elevator2.getGlobalBounds().intersects(
                 ENDelv2.getGlobalBounds())))) {
-          elevator2.move(0, 0.5);
+          elevator2.move(0, 1.0);
         }
         if (((lvr.getGlobalBounds().intersects(stlvr.getGlobalBounds()))) &&
             ((!elevator2.getGlobalBounds().intersects(
                 STRTelv2.getGlobalBounds())))) {
-          elevator2.move(0, -1);
+          elevator2.move(0, -2);
           if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
-            fireboy.move(0, -1);
+            fireboy.move(0, -2);
           }
           if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
-            watergirl.move(0, -1);
+            watergirl.move(0, -2);
           }
         }
       }
@@ -984,7 +931,7 @@ void level1(RenderWindow &window) {
             buttonSound.play();
             buttonsoundplayed = true;
           }
-          elevator1.move(0, 1);
+          elevator1.move(0, 2);
         }
         if (((!fireboy.getGlobalBounds().intersects(butt1.getGlobalBounds())) &&
              (!fireboy.getGlobalBounds().intersects(
@@ -999,12 +946,12 @@ void level1(RenderWindow &window) {
             buttonSound.play();
             buttonsoundplayed = true;
           }
-          elevator1.move(0, -1.5);
+          elevator1.move(0, -2.5);
           if (doesIntersectElevator(fireboy, elevator1, elevator2)) {
-            fireboy.move(0, -2.5);
+            fireboy.move(0, -3.5);
           }
           if (doesIntersectElevator(watergirl, elevator1, elevator2)) {
-            watergirl.move(0, -2.5);
+            watergirl.move(0, -3.5);
           }
         }
       }
@@ -1197,6 +1144,8 @@ bool doesIntersect(Sprite &player, RectangleShape ground[]) {
   }
   return false;
 }
+
+
 bool doesIntersectElevator(Sprite &player, Sprite &elevator1,
                            Sprite &elevator2) {
   // checking for collision with the right elevator
@@ -1300,7 +1249,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
         box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
     fireboy.move(vx, 0.0f);
     a++;
-    if (a % 30 == 0) {
+    if (a % 10 == 0) {
       x++;
     }
     y = 0;
@@ -1321,7 +1270,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
         box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
     fireboy.move(-vx, 0.0f);
     a++;
-    if (a % 30 == 0) {
+    if (a % 10 == 0) {
       x++;
     }
     y = 1;
@@ -1344,7 +1293,7 @@ void Fmove(Sprite &fireboy, RectangleShape &rWall, RectangleShape &rWall2,
     if (EfxIsActive)
       fbjumpSound.play();
     a++;
-    if (a % 40 == 0)
+    if (a % 20 == 0)
       x++;
     y = 2;
     x = x % 4;
@@ -1422,7 +1371,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
         box.getGlobalBounds().intersects(rWall3.getGlobalBounds()))) {
     watergirl.move(vx, 0.0f);
     a++;
-    if (a % 30 == 0) {
+    if (a % 10 == 0) {
       x++;
     }
     y = 1;
@@ -1443,7 +1392,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
         box.getGlobalBounds().intersects(lWall2.getGlobalBounds()))) {
     watergirl.move(-vx, 0.0f);
     a++;
-    if (a % 50 == 0) {
+    if (a % 10 == 0) {
       x++;
     }
     y = 0;
@@ -1466,7 +1415,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
     if (EfxIsActive)
       wgjumpSound.play();
     a++;
-    if (a % 30 == 0)
+    if (a % 7 == 0)
       x++;
     y = 2;
     x = x % 4;
@@ -1477,6 +1426,7 @@ void Wmove(Sprite &watergirl, RectangleShape &rWall, RectangleShape &rWall2,
 
   if (watergirl_Vy > 0 && !doesIntersect(watergirl, ground) &&
       !doesIntersectBox(watergirl, box, ground) &&
+      !doesIntersectElevator(watergirl,elevator1,elevator2)&&
       !Keyboard::isKeyPressed(Keyboard::D) &&
       !Keyboard::isKeyPressed(Keyboard::A)) {
     x++;
@@ -1525,21 +1475,6 @@ void scaleRectangles(int windowWidth, int windowHeight,
   size.y *= scaleY;
   ground.setPosition(position);
   ground.setSize(size);
-}
-
-void scaleBackground(Sprite &backgroundPic, const Vector2u &windowSize) {
-  float scaleX = (float)windowSize.x / 1720.f;
-  float scaleY = (float)windowSize.y / 1300.f;
-  backgroundPic.setScale(scaleX, scaleY * 0.978f);
-  backgroundPic.setPosition(-14.f * scaleX, 10.f * scaleY);
-}
-
-void scalePosition(float &xPos, float &yPos, const sf::RenderWindow &window) {
-  float xScale = window.getSize().x / 1720.f; // calculate x scaling factor
-  float yScale = window.getSize().y / 1300.f; // calculate y scaling factor
-  // scale the diamond position
-  xPos *= xScale;
-  yPos *= yScale;
 }
 
 void drawOptionsMenu(RenderWindow &window) {
@@ -1687,22 +1622,25 @@ void drawWinningMenu(RenderWindow &window, int time) {
   if ( time <= 15){
     gameTime.setFont(font);
     gameTime.setFillColor(Color::Black);
+    gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
     gameTime.setString("Rank: SSS");
   } else if (time <= 20) {
     gameTime.setFont(font);
     gameTime.setFillColor(Color::Yellow);
+    gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
     gameTime.setString("Rank: Good");
   } else if (time < 30) {
     gameTime.setFillColor(Color::Green);
     gameTime.setFont(meh);
+    gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
     gameTime.setString("Rank: Yadobk");
   } else{
     gameTime.setFont(meh);
-  cong.setCharacterSize(1.1 * (50 * (height / 1300)));
-    gameTime.setString("Rank: play again if you want to be human");
+    gameTime.setCharacterSize(1.1 * (45 * (height / 1300)));
+    gameTime.setString("Rank: play again if you want to be humans");
   }
 
-  gameTime.setCharacterSize(static_cast<float>(90) / 1720 * width);
+  
   gameTime.setPosition((width - gameTime.getGlobalBounds().width) / 2,
                        ((500 * (height / 850))));
 
@@ -1791,25 +1729,25 @@ void drawCreditesMenu(RenderWindow &window, Music &menumusic) {
   creditesmenu.font.loadFromFile("assets/flame.ttf");
   creditesmenu.size = 7;
 
-  creditesmenu.mainmenu[0].setFillColor(Color::White);
+  creditesmenu.mainmenu[0].setFillColor(Color{215,90,0});
   creditesmenu.mainmenu[0].setString("OMAR EL-EZABY");
 
-  creditesmenu.mainmenu[1].setFillColor(Color::White);
+  creditesmenu.mainmenu[1].setFillColor(Color{ 215,90,0 });
   creditesmenu.mainmenu[1].setString("OMAR WATANY");
 
-  creditesmenu.mainmenu[2].setFillColor(Color::White);
+  creditesmenu.mainmenu[2].setFillColor(Color{ 215,90,0 });
   creditesmenu.mainmenu[2].setString("OMAR EL-HAKIM");
 
-  creditesmenu.mainmenu[3].setFillColor(Color::White);
+  creditesmenu.mainmenu[3].setFillColor(Color{215, 90, 0});
   creditesmenu.mainmenu[3].setString("OMAR TEBRY");
 
-  creditesmenu.mainmenu[4].setFillColor(Color::White);
+  creditesmenu.mainmenu[4].setFillColor(Color{ 215,90,0 });
   creditesmenu.mainmenu[4].setString("OMAR IBRAHIM");
 
-  creditesmenu.mainmenu[5].setFillColor(Color::White);
+  creditesmenu.mainmenu[5].setFillColor(Color{ 215,90,0 });
   creditesmenu.mainmenu[5].setString("AHMED ALI");
 
-  creditesmenu.mainmenu[6].setFillColor(Color::White);
+  creditesmenu.mainmenu[6].setFillColor(Color{ 215,90,0 });
   creditesmenu.mainmenu[6].setString("KAREEM ABDEEN");
 
   creditesmenu.setTextFont();
